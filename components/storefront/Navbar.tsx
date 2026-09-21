@@ -130,11 +130,11 @@ export default function Navbar() {
               <LanguageSwitcher />
             </div>
 
-            {/* Wishlist Icon */}
+            {/* Wishlist Icon — desktop only; on mobile it lives in the drawer */}
             <Link
               href="/wishlist"
               id="navbar-wishlist-btn"
-              className="relative p-2.5 rounded-xl text-gray-700 hover:text-[#FF6A00] hover:bg-orange-50 transition"
+              className="relative hidden md:flex p-2.5 rounded-xl text-gray-700 hover:text-[#FF6A00] hover:bg-orange-50 transition"
               title={t.wishlist}
             >
               <Heart className="w-5 h-5" />
@@ -168,8 +168,8 @@ export default function Navbar() {
               </div>
             </button>
 
-            {/* Account Dropdown */}
-            <div className="relative" ref={accountMenuRef}>
+            {/* Account Dropdown — desktop only; on mobile it lives in the drawer */}
+            <div className="relative hidden md:block" ref={accountMenuRef}>
               <button
                 id="navbar-account-dropdown-btn"
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
@@ -378,9 +378,10 @@ export default function Navbar() {
                   <Link
                     href="/account"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:bg-orange-50"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-[#FF6A00]"
                   >
-                    {t.myAccount}
+                    <User className="w-4 h-4 text-[#FF6A00]" />
+                    <span>{t.myAccount}</span>
                   </Link>
                   <button
                     onClick={() => {
@@ -415,9 +416,15 @@ export default function Navbar() {
               <Link
                 href="/wishlist"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:bg-orange-50"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-[#FF6A00]"
               >
-                {t.wishlist} ({wishlist.length})
+                <Heart className="w-4 h-4 text-[#FF6A00]" />
+                <span>{t.wishlist}</span>
+                {wishlist.length > 0 && (
+                  <span className="ml-auto min-w-[20px] h-5 px-1 rounded-full bg-[#FF6A00] text-white text-[10px] font-bold flex items-center justify-center">
+                    {wishlist.length}
+                  </span>
+                )}
               </Link>
               <Link
                 href={isAdminLoggedIn ? '/admin' : '/admin-login'}
