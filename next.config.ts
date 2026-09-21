@@ -26,7 +26,6 @@ const nextConfig: NextConfig = {
     ],
   },
   output: 'standalone',
-  transpilePackages: ['motion'],
   experimental: {
     devtoolSegmentExplorer: false,
   },

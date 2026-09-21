@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Compass, Heart, ShoppingBag, User } from 'lucide-react';
@@ -10,32 +10,35 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
   const { cartCount, wishlist, setIsCartOpen, language } = useApp();
 
+  const navItems = useMemo(
+    () => [
+      { href: '/', label_bn: 'হোম', label_en: 'Home', icon: Home },
+      { href: '/shop', label_bn: 'শপ', label_en: 'Shop', icon: Compass },
+      { href: '/wishlist', label_bn: 'পছন্দ', label_en: 'Wishlist', icon: Heart, count: wishlist.length },
+      {
+        action: 'cart',
+        label_bn: 'কার্ট',
+        label_en: 'Cart',
+        icon: ShoppingBag,
+        count: cartCount,
+        highlight: true,
+      },
+      { href: '/account', label_bn: 'অ্যাকাউন্ট', label_en: 'Account', icon: User },
+    ],
+    [wishlist.length, cartCount],
+  );
+
   // Hide bottom nav on admin routes
   if (pathname?.startsWith('/admin')) {
     return null;
   }
 
-  const navItems = [
-    { href: '/', label_bn: 'হোম', label_en: 'Home', icon: Home },
-    { href: '/shop', label_bn: 'শপ', label_en: 'Shop', icon: Compass },
-    { href: '/wishlist', label_bn: 'পছন্দ', label_en: 'Wishlist', icon: Heart, count: wishlist.length },
-    {
-      action: 'cart',
-      label_bn: 'কার্ট',
-      label_en: 'Cart',
-      icon: ShoppingBag,
-      count: cartCount,
-      highlight: true,
-    },
-    { href: '/account', label_bn: 'অ্যাকাউন্ট', label_en: 'Account', icon: User },
-  ];
-
   return (
     <div
       id="khujigo-mobile-bottom-nav"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-orange-100 shadow-[0_-4px_20px_rgba(7,17,31,0.08)]"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-orange-100 shadow-[0_-4px_20px_rgba(7,17,31,0.08)] pb-[env(safe-area-inset-bottom)]"
     >
-      <div className="grid grid-cols-5 h-16">
+      <div className="grid grid-cols-5 h-[4.25rem]">
         {navItems.map((item, idx) => {
           const Icon = item.icon;
           const isActive = item.href ? pathname === item.href : false;

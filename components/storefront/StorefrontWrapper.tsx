@@ -25,7 +25,7 @@ export default function StorefrontWrapper({ children }: { children: React.ReactN
         <AppProvider>
           {!isAdminRoute && <Navbar />}
           <CartDrawer />
-          <div className={!isAdminRoute ? 'min-h-[calc(100vh-280px)]' : 'min-h-screen'}>
+          <div className={!isAdminRoute ? 'min-h-[calc(100dvh-280px)]' : 'min-h-screen'}>
             {children}
           </div>
           {!isAdminRoute && <Footer />}

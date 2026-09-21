@@ -431,14 +431,14 @@ function ShopFilters({ paramsKey }: { paramsKey: string }) {
             <ProductGridSkeleton count={6} />
           ) : products.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3 gap-3 sm:gap-5">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
 
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 pt-4">
+                <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
                   <button
                     onClick={() => goToPage(page - 1)}
                     disabled={page <= 1}
@@ -513,7 +513,7 @@ function ShopFilters({ paramsKey }: { paramsKey: string }) {
                 </div>
                 <button
                   onClick={() => setMobileFilterOpen(false)}
-                  className="p-1 text-gray-400 hover:text-gray-700"
+                  className="p-2 text-gray-400 hover:text-gray-700"
                 >
                   <X className="w-5 h-5" />
                 </button>

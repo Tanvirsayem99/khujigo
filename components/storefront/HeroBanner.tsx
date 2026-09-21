@@ -89,7 +89,7 @@ export default function HeroBanner() {
   return (
     <div className="relative w-full overflow-hidden rounded-3xl shadow-xl">
       {/* Slide Container */}
-      <div className={`relative bg-gradient-to-r ${active.bg_gradient} min-h-[420px] sm:min-h-[460px] lg:min-h-[480px] flex items-center transition-all duration-700`}>
+      <div className={`relative bg-gradient-to-r ${active.bg_gradient} min-h-[320px] sm:min-h-[460px] lg:min-h-[480px] flex items-center transition-all duration-700`}>
         {/* Subtle Background Radial Highlights */}
         <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-orange-500/20 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-amber-500/15 blur-3xl pointer-events-none" />
@@ -131,7 +131,7 @@ export default function HeroBanner() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
                 href={active.cta_link}
                 className="px-6 sm:px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-orange to-orange-500 hover:from-[#e55f00] hover:to-orange-600 text-white font-extrabold text-sm sm:text-base shadow-lg shadow-orange-500/30 transition-all hover:scale-102 flex items-center gap-2"
@@ -150,13 +150,13 @@ export default function HeroBanner() {
 
           {/* Image Showcase */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-3xl overflow-hidden p-2 bg-gradient-to-tr from-white/15 to-white/5 backdrop-blur-md border border-white/20 shadow-2xl">
+            <div className="relative w-44 h-44 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-3xl overflow-hidden p-2 bg-gradient-to-tr from-white/15 to-white/5 backdrop-blur-md border border-white/20 shadow-2xl">
               <div className="relative w-full h-full rounded-2xl overflow-hidden">
                 <Image
                   src={active.image_url}
                   alt={language === 'bn' ? active.title_bn : active.title_en}
                   fill
-                  sizes="(max-width: 640px) 256px, (max-width: 1024px) 320px, 384px"
+                  sizes="(max-width: 640px) 176px, (max-width: 1024px) 320px, 384px"
                   className="object-cover hover:scale-105 transition-transform duration-700"
                   priority
                   referrerPolicy="no-referrer"
@@ -181,14 +181,14 @@ export default function HeroBanner() {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-md flex items-center justify-center transition border border-white/10 z-20"
+        className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-md hidden sm:flex items-center justify-center transition border border-white/10 z-20"
         aria-label="Previous slide"
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-md flex items-center justify-center transition border border-white/10 z-20"
+        className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white backdrop-blur-md hidden sm:flex items-center justify-center transition border border-white/10 z-20"
         aria-label="Next slide"
       >
         <ChevronRight className="w-5 h-5" />

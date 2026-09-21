@@ -186,7 +186,7 @@ export default function CartPage() {
                     <div className="flex items-center border border-gray-200 rounded-xl bg-gray-50">
                       <button
                         onClick={() => updateCartQuantity(item.product_id, item.quantity - 1)}
-                        className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand-navy"
+                        className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 hover:text-brand-navy"
                       >
                         <Minus className="w-3 h-3" />
                       </button>
@@ -195,7 +195,7 @@ export default function CartPage() {
                       </span>
                       <button
                         onClick={() => updateCartQuantity(item.product_id, item.quantity + 1)}
-                        className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-brand-navy"
+                        className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 hover:text-brand-navy"
                       >
                         <Plus className="w-3 h-3" />
                       </button>

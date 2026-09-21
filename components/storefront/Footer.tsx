@@ -29,7 +29,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="bg-[#07111F] text-white pt-12 pb-24 md:pb-12 border-t border-gray-800">
+    <footer className="bg-[#07111F] text-white pt-12 pb-[calc(6rem+env(safe-area-inset-bottom))] md:pb-12 border-t border-gray-800">
       {/* 1. Value / Trust Props Strip */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 border-b border-gray-800">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-left">

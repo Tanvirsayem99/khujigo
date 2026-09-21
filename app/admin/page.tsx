@@ -93,12 +93,22 @@ export default function AdminDashboardPage() {
   // ----------------------------------------------------
   const adminReady = !isAuthLoading && isAdminLoggedIn;
 
+  // Lock background scroll while the mobile sidebar drawer is open.
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
+
   const { analytics: analyticsData } = useAdminAnalytics({ enabled: adminReady });
   const { products } = useAdminProducts({ enabled: adminReady });
   const { orders } = useAdminOrders({ enabled: adminReady });
   const { categories } = useAdminCategories({ enabled: adminReady });
-  const { coupons } = useAdminCoupons({ enabled: adminReady });
-  const { reviews } = useAdminReviews(undefined, { enabled: adminReady });
+  const { coupons } = useAdminCoupons({ enabled: adminReady && activeTab === 'coupons' });
+  const { reviews } = useAdminReviews(undefined, {
+    enabled: adminReady && activeTab === 'reviews',
+  });
   const { users: adminUsers, isLoading: usersLoading } = useAdminUsers({ enabled: adminReady });
   const { settings: deliverySettingsData } = useDeliverySettings();
 
@@ -224,6 +234,15 @@ export default function AdminDashboardPage() {
       return matchKind && matchSearch;
     });
   }, [adminUsers, userSearch, userKindFilter]);
+
+  // Precomputed once per catalog change instead of filtering per category row.
+  const productCountByCategory = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of products) {
+      counts.set(p.category_id, (counts.get(p.category_id) ?? 0) + 1);
+    }
+    return counts;
+  }, [products]);
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -607,6 +626,15 @@ export default function AdminDashboardPage() {
       {/* ============================================================ */}
       {/* 1. SIDEBAR NAVIGATION */}
       {/* ============================================================ */}
+      {/* Backdrop for the mobile sidebar — tap anywhere to dismiss */}
+      {isMobileMenuOpen && (
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+        />
+      )}
+
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-950 border-r border-slate-800 flex flex-col transition-transform duration-200 md:static md:translate-x-0 ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
@@ -626,7 +654,8 @@ export default function AdminDashboardPage() {
           </div>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="md:hidden p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+            aria-label="Close navigation menu"
+            className="md:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
           >
             <X className="w-5 h-5" />
           </button>
@@ -822,16 +851,18 @@ export default function AdminDashboardPage() {
       {/* ============================================================ */}
       <div className="flex-1 flex flex-col min-w-0 bg-slate-900/60">
         {/* Top Header */}
-        <header className="h-16 bg-slate-950/80 backdrop-blur border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
-          <div className="flex items-center gap-3">
+        <header className="h-16 bg-slate-950/80 backdrop-blur border-b border-slate-800 px-3 sm:px-6 gap-2 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden p-2 text-slate-300 hover:text-white rounded-xl hover:bg-slate-800"
+              onClick={() => setIsMobileMenuOpen((open) => !open)}
+              aria-label="Toggle navigation menu"
+              aria-expanded={isMobileMenuOpen}
+              className="md:hidden p-2.5 text-slate-300 hover:text-white rounded-xl hover:bg-slate-800"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-sm sm:text-base font-bold text-white capitalize flex items-center gap-2">
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base font-bold text-white capitalize flex items-center gap-2 truncate">
                 {activeTab === 'dashboard' && 'Executive Overview'}
                 {activeTab === 'products' && 'Catalog & Inventory Management'}
                 {activeTab === 'orders' && 'Order Processing & Dispatch'}
@@ -847,7 +878,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={triggerRefresh}
               title="Refresh database records"
@@ -862,7 +893,7 @@ export default function AdminDashboardPage() {
                 className="px-3 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-md shadow-orange-950/40 transition"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add Product</span>
+                <span className="hidden sm:inline">Add Product</span>
               </button>
             )}
 
@@ -872,7 +903,7 @@ export default function AdminDashboardPage() {
                 className="px-3 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-md transition"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add Category</span>
+                <span className="hidden sm:inline">Add Category</span>
               </button>
             )}
 
@@ -882,7 +913,7 @@ export default function AdminDashboardPage() {
                 className="px-3 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-md transition"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add Coupon</span>
+                <span className="hidden sm:inline">Add Coupon</span>
               </button>
             )}
 
@@ -890,7 +921,7 @@ export default function AdminDashboardPage() {
               href="/"
               className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-xl border border-slate-700 flex items-center gap-1.5 transition"
             >
-              <span>Shopfront</span>
+              <span className="hidden sm:inline">Shopfront</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -904,8 +935,8 @@ export default function AdminDashboardPage() {
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
               {/* Metric Cards Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800/80 shadow-sm">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="p-3 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800/80 shadow-sm">
                   <div className="flex items-center justify-between text-slate-400 mb-2">
                     <span className="text-xs font-medium">Total Revenue</span>
                     <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -920,7 +951,7 @@ export default function AdminDashboardPage() {
                   </span>
                 </div>
 
-                <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800/80 shadow-sm">
+                <div className="p-3 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800/80 shadow-sm">
                   <div className="flex items-center justify-between text-slate-400 mb-2">
                     <span className="text-xs font-medium">Total Orders</span>
                     <div className="p-2 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
@@ -933,7 +964,7 @@ export default function AdminDashboardPage() {
                   </span>
                 </div>
 
-                <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800/80 shadow-sm">
+                <div className="p-3 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800/80 shadow-sm">
                   <div className="flex items-center justify-between text-slate-400 mb-2">
                     <span className="text-xs font-medium">Pending Dispatch</span>
                     <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -954,7 +985,7 @@ export default function AdminDashboardPage() {
                   </button>
                 </div>
 
-                <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800/80 shadow-sm">
+                <div className="p-3 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800/80 shadow-sm">
                   <div className="flex items-center justify-between text-slate-400 mb-2">
                     <span className="text-xs font-medium">Low Stock Alerts</span>
                     <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
@@ -980,14 +1011,14 @@ export default function AdminDashboardPage() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left 2 Cols: Recent Orders */}
                 <div className="lg:col-span-2 bg-slate-950 border border-slate-800/80 rounded-2xl p-5 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                     <div>
                       <h3 className="text-sm font-bold text-white">Recent Orders</h3>
                       <p className="text-xs text-slate-400">Latest customer transactions</p>
                     </div>
                     <button
                       onClick={() => setActiveTab('orders')}
-                      className="text-xs text-brand-orange hover:underline font-semibold"
+                      className="shrink-0 text-xs text-brand-orange hover:underline font-semibold"
                     >
                       View All Orders ({orders.length}) →
                     </button>
@@ -1261,14 +1292,14 @@ export default function AdminDashboardPage() {
                                   <button
                                     onClick={() => handleInlineStockUpdate(p.id, p.stock_quantity, -1)}
                                     title="Decrease by 1"
-                                    className="w-5 h-5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded flex items-center justify-center text-xs font-bold"
+                                    className="w-8 h-8 sm:w-5 sm:h-5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded flex items-center justify-center text-xs font-bold"
                                   >
                                     -
                                   </button>
                                   <button
                                     onClick={() => handleInlineStockUpdate(p.id, p.stock_quantity, 5)}
                                     title="Add 5"
-                                    className="w-5 h-5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded flex items-center justify-center text-xs font-bold"
+                                    className="w-8 h-8 sm:w-5 sm:h-5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded flex items-center justify-center text-xs font-bold"
                                   >
                                     +
                                   </button>
@@ -1279,12 +1310,12 @@ export default function AdminDashboardPage() {
                             <td className="py-3 px-3">
                               <div className="flex flex-wrap gap-1">
                                 {p.is_trending && (
-                                  <span className="px-1.5 py-0.5 bg-brand-orange/20 text-brand-orange text-[9px] font-bold rounded">
+                                  <span className="px-1.5 py-0.5 bg-brand-orange/20 text-brand-orange text-[10px] font-bold rounded">
                                     Trending
                                   </span>
                                 )}
                                 {p.is_best_seller && (
-                                  <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 text-[9px] font-bold rounded">
+                                  <span className="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-bold rounded">
                                     Best Seller
                                   </span>
                                 )}
@@ -1297,21 +1328,21 @@ export default function AdminDashboardPage() {
                                   href={`/products/${p.slug}`}
                                   target="_blank"
                                   title="View on storefront"
-                                  className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
+                                  className="p-2 sm:p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
                                 >
                                   <ExternalLink className="w-3.5 h-3.5" />
                                 </Link>
                                 <button
                                   onClick={() => openEditProductModal(p)}
                                   title="Edit product"
-                                  className="p-1.5 text-slate-400 hover:text-sky-400 hover:bg-slate-800 rounded-lg transition"
+                                  className="p-2 sm:p-1.5 text-slate-400 hover:text-sky-400 hover:bg-slate-800 rounded-lg transition"
                                 >
                                   <Edit2 className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteProduct(p.id)}
                                   title="Delete product"
-                                  className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition"
+                                  className="p-2 sm:p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -1333,12 +1364,12 @@ export default function AdminDashboardPage() {
           {activeTab === 'orders' && (
             <div className="space-y-4">
               {/* Status Tabs */}
-              <div className="flex flex-wrap items-center gap-1.5 pb-2 border-b border-slate-800">
+              <div className="flex items-center gap-1.5 pb-2 border-b border-slate-800 overflow-x-auto">
                 {['ALL', 'PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map((st) => (
                   <button
                     key={st}
                     onClick={() => setOrderStatusFilter(st)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
+                    className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold transition ${
                       orderStatusFilter === st
                         ? 'bg-brand-orange text-white'
                         : 'bg-slate-900 text-slate-400 hover:text-white'
@@ -1489,7 +1520,7 @@ export default function AdminDashboardPage() {
                         <h4 className="text-xs font-bold text-white">{cat.name_en}</h4>
                         <p className="text-[11px] text-slate-400">{cat.name_bn}</p>
                         <span className="text-[10px] text-brand-orange font-mono">
-                          /{cat.slug} • {products.filter((p) => p.category_id === cat.id).length} products
+                          /{cat.slug} • {productCountByCategory.get(cat.id) ?? 0} products
                         </span>
                       </div>
                     </div>
@@ -1516,7 +1547,7 @@ export default function AdminDashboardPage() {
                       </span>
                       <button
                         onClick={() => handleToggleCoupon(c.id)}
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        className={`text-[11px] font-bold px-2 py-1 rounded-full ${
                           c.is_active
                             ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                             : 'bg-slate-800 text-slate-500'
@@ -1556,6 +1587,7 @@ export default function AdminDashboardPage() {
           {activeTab === 'reviews' && (
             <div className="space-y-4">
               <div className="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-900 border-b border-slate-800 text-slate-400 font-semibold">
                     <tr>
@@ -1601,7 +1633,7 @@ export default function AdminDashboardPage() {
                             {rev.status !== 'APPROVED' && (
                               <button
                                 onClick={() => handleApproveReview(rev.id)}
-                                className="px-2 py-1 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 rounded text-[10px] font-bold"
+                                className="px-2 py-2 sm:py-1 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 rounded text-[11px] font-bold"
                               >
                                 Approve
                               </button>
@@ -1609,14 +1641,14 @@ export default function AdminDashboardPage() {
                             {rev.status !== 'REJECTED' && (
                               <button
                                 onClick={() => handleRejectReview(rev.id)}
-                                className="px-2 py-1 bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 rounded text-[10px] font-bold"
+                                className="px-2 py-2 sm:py-1 bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 rounded text-[11px] font-bold"
                               >
                                 Reject
                               </button>
                             )}
                             <button
                               onClick={() => handleDeleteReview(rev.id)}
-                              className="p-1 text-slate-400 hover:text-rose-400"
+                              className="p-2 sm:p-1 text-slate-400 hover:text-rose-400"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
@@ -1626,6 +1658,7 @@ export default function AdminDashboardPage() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}
@@ -1821,15 +1854,15 @@ export default function AdminDashboardPage() {
       {/* 3. MODAL: ADD / EDIT PRODUCT */}
       {/* ============================================================ */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 text-white my-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 text-white my-3 sm:my-8 max-h-[calc(100dvh-1.5rem)] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <h3 className="text-base font-bold text-white">
                 {editingProduct ? 'Edit Catalog Product' : 'Add New Trending Product'}
               </h3>
               <button
                 onClick={() => setIsProductModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1967,7 +2000,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-6 pt-2">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2">
                 <label className="flex items-center gap-2 cursor-pointer text-slate-300">
                   <input
                     type="checkbox"
@@ -2014,8 +2047,8 @@ export default function AdminDashboardPage() {
       {/* 4. MODAL: ORDER DETAILS & RECEIPT INSPECTOR */}
       {/* ============================================================ */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 text-white my-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 text-white my-3 sm:my-8 max-h-[calc(100dvh-1.5rem)] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
@@ -2028,7 +2061,7 @@ export default function AdminDashboardPage() {
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2201,13 +2234,13 @@ export default function AdminDashboardPage() {
       {/* 5. MODAL: ADD CATEGORY */}
       {/* ============================================================ */}
       {isCategoryModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-md w-full p-6 text-white shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-md w-full p-6 text-white my-3 sm:my-8 max-h-[calc(100dvh-1.5rem)] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <h3 className="text-sm font-bold text-white">Create New Category</h3>
               <button
                 onClick={() => setIsCategoryModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2287,13 +2320,13 @@ export default function AdminDashboardPage() {
       {/* 6. MODAL: ADD COUPON */}
       {/* ============================================================ */}
       {isCouponModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-md w-full p-6 text-white shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-md w-full p-6 text-white my-3 sm:my-8 max-h-[calc(100dvh-1.5rem)] overflow-y-auto shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
               <h3 className="text-sm font-bold text-white">Create Discount Coupon</h3>
               <button
                 onClick={() => setIsCouponModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2312,7 +2345,7 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block text-slate-300 font-semibold mb-1">Discount Type</label>
                   <select

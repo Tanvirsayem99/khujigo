@@ -18,9 +18,17 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'trending' | 'best_seller' | 'new_arrival'>('trending');
   const [couponCopied, setCouponCopied] = useState(false);
 
+  // Only the visible tab is fetched up front; the other two load on first visit.
+  // `trending` stays enabled because it doubles as the empty-state fallback.
   const trending = useProducts({ trending: true, limit: 8 });
-  const bestSellers = useProducts({ bestSeller: true, limit: 8 });
-  const newArrivals = useProducts({ newArrival: true, limit: 8 });
+  const bestSellers = useProducts(
+    { bestSeller: true, limit: 8 },
+    { enabled: activeTab === 'best_seller' },
+  );
+  const newArrivals = useProducts(
+    { newArrival: true, limit: 8 },
+    { enabled: activeTab === 'new_arrival' },
+  );
 
   const activeCollection =
     activeTab === 'trending'
@@ -74,7 +82,7 @@ export default function HomePage() {
           </div>
 
           {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 p-1 bg-white rounded-2xl border border-gray-200 self-start sm:self-auto shadow-xs">
+          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-white rounded-2xl border border-gray-200 self-start sm:self-auto shadow-xs">
             <button
               onClick={() => setActiveTab('trending')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
@@ -117,7 +125,7 @@ export default function HomePage() {
         ) : activeCollection.isLoading ? (
           <ProductGridSkeleton count={8} />
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
             {displayedProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -151,7 +159,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 z-10 bg-white/10 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-white/30">
+        <div className="flex flex-wrap items-center gap-3 z-10 bg-white/10 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-white/30">
           <div className="px-4 py-2 bg-white text-brand-navy rounded-xl font-mono font-black text-sm sm:text-base tracking-widest shadow-xs">
             KHUJIGO100
           </div>

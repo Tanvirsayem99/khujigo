@@ -14,7 +14,7 @@ interface ProductCardProps {
   priority?: boolean;
 }
 
-export default function ProductCard({ product, priority = false }: ProductCardProps) {
+function ProductCard({ product, priority = false }: ProductCardProps) {
   const router = useRouter();
   const { language, t, addToCart, isInWishlist, toggleWishlist, showToast } = useApp();
 
@@ -58,7 +58,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           src={product.thumbnail_url}
           alt={language === 'bn' ? product.name_bn : product.name_en}
           fill
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           priority={priority}
           referrerPolicy="no-referrer"
@@ -83,7 +83,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
         <button
           id={`wishlist-btn-${product.id}`}
           onClick={handleWishlistToggle}
-          className={`absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 shadow-md z-10 ${
+          className={`absolute top-2.5 right-2.5 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 shadow-md z-10 ${
             isWishlisted
               ? 'bg-rose-500 text-white scale-110 shadow-rose-500/30'
               : 'bg-white/90 text-gray-500 hover:text-rose-500 hover:bg-white'
@@ -102,7 +102,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       </Link>
 
       {/* Content Area */}
-      <div className="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
+      <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
         <div>
           {/* Category & Rating */}
           <div className="flex items-center justify-between gap-2 text-xs text-gray-500 mb-1.5">
@@ -138,11 +138,11 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           </div>
 
           {/* Dual Action Buttons (Add to Cart + Buy Now) */}
-          <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <button
               id={`add-cart-btn-${product.id}`}
               onClick={handleAddToCart}
-              className="w-full py-2 px-2 rounded-xl bg-orange-50 hover:bg-orange-100 text-brand-orange text-xs font-bold transition flex items-center justify-center gap-1 border border-orange-200/60 active:scale-95"
+              className="w-full py-2.5 px-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-brand-orange text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1 border border-orange-200/60 active:scale-95"
               title={language === 'bn' ? 'কার্টে যোগ করুন' : 'Add to Cart'}
             >
               <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
@@ -151,7 +151,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             <button
               id={`buy-now-btn-${product.id}`}
               onClick={handleBuyNow}
-              className="w-full py-2 px-2 rounded-xl bg-gradient-to-r from-brand-orange to-orange-500 hover:from-[#e55f00] hover:to-orange-600 text-white text-xs font-bold transition shadow-sm shadow-orange-500/25 flex items-center justify-center gap-1 active:scale-95"
+              className="w-full py-2.5 px-1.5 rounded-xl bg-gradient-to-r from-brand-orange to-orange-500 hover:from-[#e55f00] hover:to-orange-600 text-white text-[11px] sm:text-xs font-bold transition shadow-sm shadow-orange-500/25 flex items-center justify-center gap-1 active:scale-95"
               title={language === 'bn' ? 'সরাসরি অর্ডার করুন' : 'Order Now'}
             >
               <Zap className="w-3.5 h-3.5 fill-current shrink-0" />
@@ -163,3 +163,5 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
     </div>
   );
 }
+
+export default React.memo(ProductCard);

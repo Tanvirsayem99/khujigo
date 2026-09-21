@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import { AdminRole, AdminUser } from '@/types';
@@ -281,24 +282,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [adminUser],
   );
 
+  const value = useMemo<AuthContextType>(
+    () => ({
+      isAuthLoading,
+      customer,
+      isCustomerLoggedIn: !!customer,
+      loginCustomer,
+      registerCustomer,
+      updateCustomerProfile,
+      logoutCustomer,
+      adminUser,
+      isAdminLoggedIn: !!adminUser,
+      adminRole: adminUser ? adminUser.role : null,
+      loginAdmin,
+      logoutAdmin,
+      hasPermission,
+    }),
+    [
+      isAuthLoading,
+      customer,
+      loginCustomer,
+      registerCustomer,
+      updateCustomerProfile,
+      logoutCustomer,
+      adminUser,
+      loginAdmin,
+      logoutAdmin,
+      hasPermission,
+    ],
+  );
+
   return (
-    <AuthContext.Provider
-      value={{
-        isAuthLoading,
-        customer,
-        isCustomerLoggedIn: !!customer,
-        loginCustomer,
-        registerCustomer,
-        updateCustomerProfile,
-        logoutCustomer,
-        adminUser,
-        isAdminLoggedIn: !!adminUser,
-        adminRole: adminUser ? adminUser.role : null,
-        loginAdmin,
-        logoutAdmin,
-        hasPermission,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

@@ -369,7 +369,7 @@ export default function ProductDetailPage() {
               <div className="flex items-center border border-gray-200 rounded-xl bg-white shadow-xs">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-9 h-9 flex items-center justify-center text-gray-600 hover:text-brand-navy hover:bg-gray-50 rounded-l-xl transition"
+                  className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center text-gray-600 hover:text-brand-navy hover:bg-gray-50 rounded-l-xl transition"
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
@@ -378,7 +378,7 @@ export default function ProductDetailPage() {
                 </span>
                 <button
                   onClick={() => setQuantity((q) => Math.min(product.stock_quantity || 10, q + 1))}
-                  className="w-9 h-9 flex items-center justify-center text-gray-600 hover:text-brand-navy hover:bg-gray-50 rounded-r-xl transition"
+                  className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center text-gray-600 hover:text-brand-navy hover:bg-gray-50 rounded-r-xl transition"
                 >
                   <Plus className="w-3.5 h-3.5" />
                 </button>
@@ -683,7 +683,7 @@ export default function ProductDetailPage() {
               {language === 'bn' ? 'আরও দেখুন' : 'View More'}
             </Link>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
             {relatedProducts.map((rp) => (
               <ProductCard key={rp.id} product={rp} />
             ))}

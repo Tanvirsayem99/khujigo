@@ -19,8 +19,8 @@ export default function CartDrawer() {
         onClick={() => setIsCartOpen(false)}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+      <div className="fixed inset-y-0 right-0 max-w-full flex">
+        <div className="w-[calc(100vw-2.5rem)] max-w-md bg-white shadow-2xl flex flex-col">
           {/* Header */}
           <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-[#FFF9F2]">
             <div className="flex items-center gap-2">
@@ -37,7 +37,7 @@ export default function CartDrawer() {
             <button
               id="cart-drawer-close-btn"
               onClick={() => setIsCartOpen(false)}
-              className="p-2 rounded-xl text-gray-400 hover:text-[#07111F] hover:bg-gray-100 transition"
+              className="p-2.5 rounded-xl text-gray-400 hover:text-[#07111F] hover:bg-gray-100 transition"
             >
               <X className="w-5 h-5" />
             </button>
@@ -109,7 +109,7 @@ export default function CartDrawer() {
                       <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                         <button
                           onClick={() => updateCartQuantity(item.product_id, item.quantity - 1)}
-                          className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition"
+                          className="w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
@@ -118,7 +118,7 @@ export default function CartDrawer() {
                         </span>
                         <button
                           onClick={() => updateCartQuantity(item.product_id, item.quantity + 1)}
-                          className="w-7 h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition"
+                          className="w-8 h-8 sm:w-7 sm:h-7 flex items-center justify-center text-gray-600 hover:bg-gray-200 transition"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -135,7 +135,7 @@ export default function CartDrawer() {
 
           {/* Footer & Checkout Action */}
           {cart.length > 0 && (
-            <div className="p-5 border-t border-gray-100 bg-[#FFF9F2]/50 space-y-4">
+            <div className="p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] border-t border-gray-100 bg-[#FFF9F2]/50 space-y-4">
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between text-gray-600 text-xs">
                   <span>{t.subtotal}</span>

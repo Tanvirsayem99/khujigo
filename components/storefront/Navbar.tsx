@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Search, ShoppingBag, Heart, User, Menu, X, Phone, ShieldCheck, Flame, Tag, Sparkles, LogIn, LogOut, Package } from 'lucide-react';
@@ -17,6 +17,28 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+
+  // Touch devices never fire `mouseleave`, so dismiss the account menu on an
+  // outside tap (the previous hover-only behaviour left it stuck open).
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!accountMenuRef.current?.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [accountMenuOpen]);
+
+  // Stop the page behind the full-screen mobile drawer from scrolling.
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +55,7 @@ export default function Navbar() {
       {/* 1. Top Announcement Bar */}
       <div className="bg-[#07111F] text-white text-xs border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
+          <div className="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap min-w-0">
             <span className="inline-block w-2 h-2 rounded-full bg-[#FFC400] shrink-0 animate-pulse" />
             <span className="font-medium text-gray-200 text-[11px] sm:text-xs">
               {t.topNotice}
@@ -66,8 +88,9 @@ export default function Navbar() {
             <button
               id="mobile-menu-toggle-btn"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-xl text-[#07111F] hover:bg-orange-50 transition"
+              className="md:hidden p-2.5 -ml-1 rounded-xl text-[#07111F] hover:bg-orange-50 transition"
               aria-label="Toggle Navigation Menu"
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -111,7 +134,7 @@ export default function Navbar() {
             <Link
               href="/wishlist"
               id="navbar-wishlist-btn"
-              className="relative p-2 rounded-xl text-gray-700 hover:text-[#FF6A00] hover:bg-orange-50 transition"
+              className="relative p-2.5 rounded-xl text-gray-700 hover:text-[#FF6A00] hover:bg-orange-50 transition"
               title={t.wishlist}
             >
               <Heart className="w-5 h-5" />
@@ -126,7 +149,7 @@ export default function Navbar() {
             <button
               id="navbar-cart-trigger-btn"
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 sm:px-3.5 sm:py-2 rounded-full bg-[#FF6A00]/10 hover:bg-[#FF6A00]/20 text-[#FF6A00] transition flex items-center gap-2 group"
+              className="relative p-2.5 sm:px-3.5 sm:py-2 rounded-full bg-[#FF6A00]/10 hover:bg-[#FF6A00]/20 text-[#FF6A00] transition flex items-center gap-2 group"
               title={t.cart}
             >
               <div className="relative">
@@ -146,12 +169,13 @@ export default function Navbar() {
             </button>
 
             {/* Account Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={accountMenuRef}>
               <button
                 id="navbar-account-dropdown-btn"
                 onClick={() => setAccountMenuOpen(!accountMenuOpen)}
-                className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl text-gray-700 hover:text-[#07111F] hover:bg-orange-50 transition flex items-center gap-1.5"
+                className="p-2.5 sm:px-2.5 sm:py-1.5 rounded-xl text-gray-700 hover:text-[#07111F] hover:bg-orange-50 transition flex items-center gap-1.5"
                 title={t.account}
+                aria-expanded={accountMenuOpen}
               >
                 {isCustomerLoggedIn && customer ? (
                   <div className="w-7 h-7 rounded-full bg-brand-orange text-white text-xs font-bold flex items-center justify-center">
@@ -309,7 +333,8 @@ export default function Navbar() {
             <Logo variant="full" />
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="p-2 rounded-xl text-gray-500 hover:bg-gray-100"
+              className="p-2.5 rounded-xl text-gray-500 hover:bg-gray-100"
+              aria-label="Close Navigation Menu"
             >
               <X className="w-6 h-6" />
             </button>
