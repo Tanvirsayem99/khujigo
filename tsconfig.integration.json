@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmitOnError": false,
+    "rootDir": "D:/khuji/khujigo",
+    "outDir": "D:/khuji/khujigo/.tmp-fe-build",
+    "baseUrl": "D:/khuji/khujigo",
+    "paths": { "@/*": ["./*"] }
+  },
+  "include": [],
+  "files": ["D:/khuji/khujigo/lib/api/endpoints.ts"]
+}

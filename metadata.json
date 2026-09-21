@@ -1,0 +1,6 @@
+{
+  "name": "KhujiGo - খুঁজে নিন ট্রেন্ডিং সবকিছু!",
+  "description": "KhujiGo is a modern Bangladeshi e-commerce platform where customers can discover trending, useful, unique, and interesting products and order them online.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
