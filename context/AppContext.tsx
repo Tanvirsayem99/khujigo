@@ -292,7 +292,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       {/* Global Toast Notification */}
       {toastMessage && (
         <div
-          className={`fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:bottom-6 right-4 z-50 max-w-[calc(100vw-2rem)] text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-fade-in text-xs sm:text-sm font-medium border ${
+          className={`fixed bottom-[calc(8.75rem+env(safe-area-inset-bottom))] md:bottom-6 right-4 z-50 max-w-[calc(100vw-2rem)] text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-fade-in text-xs sm:text-sm font-medium border ${
             toastType === 'success'
               ? 'bg-emerald-950 border-emerald-600 text-emerald-100'
               : toastType === 'error'
