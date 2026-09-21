@@ -8,19 +8,18 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // Allow access to remote image placeholders.
-  // Each hostname needs its own entry - putting several hostnames in one
-  // string makes the pattern invalid and breaks every next/image render.
+  // Product images are pasted in from whatever host a supplier uses (ImgBB,
+  // Cloudinary, arbitrary CDNs), so allow any HTTPS host. A narrower allowlist
+  // means adding a host is required before a product image will render at all.
+  //
+  // Trade-off: this lets anyone use `/_next/image?url=...` as a fetch/cache
+  // proxy for arbitrary HTTPS images. If that matters, replace `**` with an
+  // explicit hostname list and pass `unoptimized` for off-list images.
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'picsum.photos',
-        pathname: '/**', // This allows any path under the hostname
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.nyq.info',
+        hostname: '**',
         pathname: '/**',
       },
     ],
