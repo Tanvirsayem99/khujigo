@@ -124,6 +124,7 @@ export function toOrder(o: ApiOrder): Order {
     total_amount: o.totalAmount,
     payment_method: o.paymentMethod,
     payment_status: o.paymentStatus,
+    delivery_charge_paid: o.deliveryChargePaid,
     order_status: o.orderStatus,
     created_at: o.createdAt,
     updated_at: o.updatedAt,

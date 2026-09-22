@@ -22,6 +22,7 @@ import {
   toggleCoupon,
   updateBanner,
   updateDeliverySettings,
+  updateOrderDeliveryCharge,
   updateOrderPaymentStatus,
   updateOrderStatus,
   updateProduct,
@@ -424,6 +425,22 @@ export default function AdminDashboardPage() {
       }
     } catch (error) {
       showToast(apiError(error, 'Could not update the payment status.'), 'error');
+    }
+  };
+
+  const handleUpdateDeliveryChargePaid = async (orderId: string, paid: boolean) => {
+    try {
+      await updateOrderDeliveryCharge(orderId, paid);
+      showToast(
+        `Order #${orderId} delivery charge marked as ${paid ? 'received' : 'not received'}`,
+        'success'
+      );
+      triggerRefresh();
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setSelectedOrder((prev) => (prev ? { ...prev, delivery_charge_paid: paid } : null));
+      }
+    } catch (error) {
+      showToast(apiError(error, 'Could not update the delivery charge status.'), 'error');
     }
   };
 
@@ -1708,6 +1725,15 @@ export default function AdminDashboardPage() {
                             >
                               {ord.payment_status}
                             </span>
+                            {ord.payment_method === 'COD' && (
+                              <span
+                                className={`text-[10px] font-bold block mt-0.5 ${
+                                  ord.delivery_charge_paid ? 'text-emerald-400' : 'text-rose-400'
+                                }`}
+                              >
+                                DC {ord.delivery_charge_paid ? 'PAID' : 'UNPAID'}
+                              </span>
+                            )}
                           </td>
 
                           <td className="py-3 px-3">
@@ -2640,6 +2666,29 @@ export default function AdminDashboardPage() {
                   </button>
                 </div>
 
+                {selectedOrder.payment_method === 'COD' && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-300">Delivery Charge:</span>
+                    <button
+                      onClick={() =>
+                        handleUpdateDeliveryChargePaid(
+                          selectedOrder.id,
+                          !selectedOrder.delivery_charge_paid
+                        )
+                      }
+                      className={`px-3 py-1 rounded-xl text-xs font-bold transition ${
+                        selectedOrder.delivery_charge_paid
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                      }`}
+                    >
+                      {selectedOrder.delivery_charge_paid
+                        ? `Received ${formatBDT(selectedOrder.delivery_charge)} (Click to toggle)`
+                        : `Not received (${formatBDT(selectedOrder.delivery_charge)}) — Click to mark received`}
+                    </button>
+                  </div>
+                )}
+
                 {selectedOrder.order_status === 'CANCELLED' && (
                   <button
                     onClick={() => handleDeleteOrder(selectedOrder.id)}
@@ -2654,7 +2703,9 @@ export default function AdminDashboardPage() {
               {selectedOrder.payment_reference && (
                 <div className="rounded-xl bg-slate-800/60 border border-slate-700 px-3 py-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                    Payment Reference (bKash / Nagad TrxID)
+                    {selectedOrder.payment_method === 'COD'
+                      ? 'Delivery Charge Reference (bKash / Nagad TrxID)'
+                      : 'Payment Reference (bKash / Nagad TrxID)'}
                   </span>
                   <span className="font-mono text-xs text-amber-300">
                     {selectedOrder.payment_reference}

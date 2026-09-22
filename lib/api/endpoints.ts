@@ -357,6 +357,19 @@ export async function updateOrderPaymentStatus(
   );
 }
 
+/** Staff confirmation that a COD order's delivery-charge advance arrived. */
+export async function updateOrderDeliveryCharge(
+  id: string,
+  paid: boolean,
+): Promise<Order> {
+  return toOrder(
+    await apiRequest<ApiOrder>(
+      `/orders/${encodeURIComponent(id)}/delivery-charge`,
+      { method: 'PATCH', body: { paid }, auth: 'admin' },
+    ),
+  );
+}
+
 /** Permanently removes a cancelled order (and its items) from the database. */
 export async function deleteOrder(id: string): Promise<void> {
   await apiRequest(`/orders/${encodeURIComponent(id)}`, {

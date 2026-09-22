@@ -203,8 +203,21 @@ export default function OrderTrackingPage() {
             </p>
             {order.payment_reference && (
               <p className="text-xs text-gray-500">
-                {t({ en: 'Transaction ID: ', bn: 'ট্রানজেকশন আইডি: ' })}
+                {order.payment_method === 'COD'
+                  ? t({ en: 'Delivery charge TrxID: ', bn: 'ডেলিভারি চার্জ TrxID: ' })
+                  : t({ en: 'Transaction ID: ', bn: 'ট্রানজেকশন আইডি: ' })}
                 <span className="font-mono text-brand-navy">{order.payment_reference}</span>
+              </p>
+            )}
+            {order.payment_method === 'COD' && order.delivery_charge > 0 && (
+              <p
+                className={`text-xs font-bold ${
+                  order.delivery_charge_paid ? 'text-emerald-600' : 'text-amber-600'
+                }`}
+              >
+                {order.delivery_charge_paid
+                  ? t({ en: 'Delivery charge paid in advance ✓', bn: 'ডেলিভারি চার্জ অগ্রিম পরিশোধিত ✓' })
+                  : t({ en: 'Delivery charge under verification', bn: 'ডেলিভারি চার্জ যাচাইাধীন' })}
               </p>
             )}
           </div>

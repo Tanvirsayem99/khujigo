@@ -199,8 +199,22 @@ export default function OrderSuccessPage() {
             <OrderStatusBadge status={order.order_status} />
             {order.payment_reference && (
               <p className="text-xs text-gray-500">
-                {language === 'bn' ? 'ট্রানজেকশন আইডি' : 'Transaction ID'}:{' '}
+                {order.payment_method === 'COD'
+                  ? (language === 'bn' ? 'ডেলিভারি চার্জ TrxID' : 'Delivery charge TrxID')
+                  : (language === 'bn' ? 'ট্রানজেকশন আইডি' : 'Transaction ID')}
+                :{' '}
                 <span className="font-mono text-brand-navy">{order.payment_reference}</span>
+              </p>
+            )}
+            {order.payment_method === 'COD' && order.delivery_charge > 0 && (
+              <p
+                className={`text-xs font-bold ${
+                  order.delivery_charge_paid ? 'text-emerald-600' : 'text-amber-600'
+                }`}
+              >
+                {order.delivery_charge_paid
+                  ? (language === 'bn' ? 'ডেলিভারি চার্জ অগ্রিম পরিশোধিত ✓' : 'Delivery charge paid in advance ✓')
+                  : (language === 'bn' ? 'ডেলিভারি চার্জ যাচাইাধীন' : 'Delivery charge under verification')}
               </p>
             )}
           </div>

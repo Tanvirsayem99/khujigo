@@ -147,6 +147,7 @@ export interface ApiOrder {
   totalAmount: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  deliveryChargePaid: boolean;
   orderStatus: OrderStatus;
   createdAt: string;
   updatedAt: string;

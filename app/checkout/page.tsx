@@ -28,6 +28,9 @@ import { BANGLADESH_DIVISIONS, formatPriceBD, toBanglaNumber } from '@/lib/bangl
 import { trackInitiateCheckout, trackPurchase } from '@/lib/analytics/facebook-pixel';
 import { PaymentMethod } from '@/types';
 
+/** Merchant mobile-wallet number customers Send Money to. */
+const PAYMENT_NUMBER = '01690-187372';
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { language, cart, cartTotal, clearCart, showToast } = useApp();
@@ -158,9 +161,16 @@ export default function CheckoutPage() {
       return;
     }
 
-    if ((paymentMethod === 'BKASH' || paymentMethod === 'NAGAD') && !transactionId.trim()) {
+    // COD advances the delivery charge through bKash/Nagad, so a TrxID is
+    // required there too — but only when there is a charge to pay.
+    const requiresTransactionId =
+      paymentMethod === 'BKASH' ||
+      paymentMethod === 'NAGAD' ||
+      (paymentMethod === 'COD' && deliveryCharge > 0);
+
+    if (requiresTransactionId && !transactionId.trim()) {
       showToast(
-        language === 'bn' ? 'অনুগ্রহ করে বিকাশ/নগদ ট্রানজেকশন আইডি (TrxID) প্রদান করুন' : 'Please provide your Transaction ID',
+        language === 'bn' ? 'অনুগ্রহ করে ট্রানজেকশন আইডি (TrxID) প্রদান করুন' : 'Please provide your Transaction ID',
         'error'
       );
       return;
@@ -486,6 +496,44 @@ export default function CheckoutPage() {
                         ? 'পণ্য হাতে পেয়ে চেক করে ডেলিভারি ম্যানকে সম্পূর্ণ মূল্য পরিশোধ করুন।'
                         : 'Pay cash to the delivery rider once you receive and inspect your package.'}
                     </p>
+
+                    {paymentMethod === 'COD' && (
+                      <div className="mt-3 p-3 bg-orange-50 rounded-xl border border-orange-200 text-xs space-y-2">
+                        {deliveryCharge > 0 ? (
+                          <>
+                            <p className="font-semibold text-orange-900">
+                              {language === 'bn'
+                                ? `ডেলিভারি চার্জ ৳${toBanglaNumber(deliveryCharge)} অগ্রিম পরিশোধ করুন — বিকাশ/নগদ: ${PAYMENT_NUMBER} (Send Money)`
+                                : `Pay the ৳${formatPriceBD(deliveryCharge)} delivery charge in advance — bKash/Nagad: ${PAYMENT_NUMBER} (Send Money)`}
+                            </p>
+                            <p className="text-[11px] text-orange-800">
+                              {language === 'bn'
+                                ? 'শুধু ডেলিভারি চার্জটি এখন পরিশোধ করুন; বাকি টাকা পণ্য হাতে পেয়ে দিবেন।'
+                                : 'Pay only the delivery charge now; pay the rest in cash when you receive the order.'}
+                            </p>
+                            <div>
+                              <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                                {language === 'bn' ? 'ডেলিভারি চার্জের ট্রানজেকশন আইডি (TrxID):' : 'Delivery charge TrxID:'}
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                value={transactionId}
+                                onChange={(e) => setTransactionId(e.target.value.toUpperCase())}
+                                placeholder="e.g. 9J82KZ61"
+                                className="w-full px-3 py-1.5 bg-white border border-orange-300 rounded-lg text-xs font-mono uppercase focus:outline-hidden"
+                              />
+                            </div>
+                          </>
+                        ) : (
+                          <p className="font-semibold text-emerald-800">
+                            {language === 'bn'
+                              ? 'এই অর্ডারে ডেলিভারি চার্জ ফ্রি — কিছুই অগ্রিম দিতে হবে না।'
+                              : 'Delivery is free for this order — nothing to pay in advance.'}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </label>
 
@@ -520,8 +568,8 @@ export default function CheckoutPage() {
                       <div className="mt-3 p-3 bg-pink-50 rounded-xl border border-pink-200 text-xs space-y-2">
                         <p className="font-semibold text-pink-900">
                           {language === 'bn'
-                            ? 'বিকাশ নম্বর: 01799-887766 (Send Money / Payment)'
-                            : 'bKash Number: 01799-887766 (Personal)'}
+                            ? `বিকাশ নম্বর: ${PAYMENT_NUMBER} (Send Money / Payment)`
+                            : `bKash Number: ${PAYMENT_NUMBER} (Personal)`}
                         </p>
                         <div>
                           <label className="block text-[11px] font-bold text-gray-700 mb-1">
@@ -572,8 +620,8 @@ export default function CheckoutPage() {
                       <div className="mt-3 p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs space-y-2">
                         <p className="font-semibold text-amber-900">
                           {language === 'bn'
-                            ? 'নগদ নম্বর: 01799-887766 (Send Money)'
-                            : 'Nagad Number: 01799-887766 (Personal)'}
+                            ? `নগদ নম্বর: ${PAYMENT_NUMBER} (Send Money)`
+                            : `Nagad Number: ${PAYMENT_NUMBER} (Personal)`}
                         </p>
                         <div>
                           <label className="block text-[11px] font-bold text-gray-700 mb-1">

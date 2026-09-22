@@ -120,11 +120,14 @@ export interface Order {
   delivery_charge: number;
   discount: number;
   coupon_code?: string;
-  /** bKash/Nagad transaction id, verified manually by staff. */
+  /** bKash/Nagad transaction id, verified manually by staff. For COD orders
+   * this is the transaction id of the delivery-charge advance. */
   payment_reference?: string;
   total_amount: number;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;
+  /** Whether the COD delivery-charge advance has been confirmed by staff. */
+  delivery_charge_paid: boolean;
   order_status: OrderStatus;
   created_at: string;
   updated_at: string;
