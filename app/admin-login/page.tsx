@@ -42,6 +42,7 @@ export default function AdminLoginPage() {
           >
             Go to Admin Dashboard
           </button>
+          {/* admin  */}
         </div>
       </main>
     );
