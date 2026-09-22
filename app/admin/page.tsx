@@ -8,24 +8,30 @@ import { useAuth } from '@/context/AuthContext';
 import { useApp } from '@/context/AppContext';
 import { ApiError } from '@/lib/api/client';
 import {
+  createBanner,
   createCategory,
   createCoupon,
   createProduct,
+  deleteBanner,
   deleteCoupon,
+  deleteOrder,
   deleteProduct,
   deleteReview,
   setProductStock,
   setReviewStatus,
   toggleCoupon,
+  updateBanner,
   updateDeliverySettings,
   updateOrderPaymentStatus,
   updateOrderStatus,
   updateProduct,
+  updatePromoSection,
   updateUserRole,
 } from '@/lib/api/endpoints';
 import {
   revalidateAdmin,
   useAdminAnalytics,
+  useAdminBanners,
   useAdminCategories,
   useAdminCoupons,
   useAdminOrders,
@@ -33,9 +39,10 @@ import {
   useAdminReviews,
   useAdminUsers,
   useDeliverySettings,
+  usePromoSection,
 } from '@/lib/hooks/api';
 import { RowsSkeleton } from '@/components/common/LoadingStates';
-import { Product, Order, Category, Coupon, Review, AdminRole, ManagedUser } from '@/types';
+import { Product, Order, Category, Coupon, Review, Banner, AdminRole, ManagedUser } from '@/types';
 import { formatBDT } from '@/lib/constants';
 import Logo from '@/components/common/Logo';
 import {
@@ -75,9 +82,10 @@ import {
   PhoneCall,
   MapPin,
   FileText,
+  Images,
 } from 'lucide-react';
 
-type AdminTab = 'dashboard' | 'products' | 'orders' | 'categories' | 'coupons' | 'reviews' | 'settings' | 'users';
+type AdminTab = 'dashboard' | 'products' | 'orders' | 'categories' | 'banners' | 'coupons' | 'reviews' | 'settings' | 'users';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -106,11 +114,15 @@ export default function AdminDashboardPage() {
   const { orders } = useAdminOrders({ enabled: adminReady });
   const { categories } = useAdminCategories({ enabled: adminReady });
   const { coupons } = useAdminCoupons({ enabled: adminReady && activeTab === 'coupons' });
+  const { banners } = useAdminBanners({ enabled: adminReady && activeTab === 'banners' });
   const { reviews } = useAdminReviews(undefined, {
     enabled: adminReady && activeTab === 'reviews',
   });
   const { users: adminUsers, isLoading: usersLoading } = useAdminUsers({ enabled: adminReady });
   const { settings: deliverySettingsData } = useDeliverySettings();
+  const { promo: promoSection, refresh: refreshPromo } = usePromoSection({
+    enabled: adminReady && activeTab === 'coupons',
+  });
 
   // Replaces the old `refreshKey` counter: invalidate every admin query.
   const triggerRefresh = () => {
@@ -156,7 +168,7 @@ export default function AdminDashboardPage() {
   const [prodFormSku, setProdFormSku] = useState('');
   const [prodFormDescEn, setProdFormDescEn] = useState('');
   const [prodFormDescBn, setProdFormDescBn] = useState('');
-  const [prodFormImage, setProdFormImage] = useState('');
+  const [prodFormImages, setProdFormImages] = useState<string[]>(['']);
   const [prodFormIsTrending, setProdFormIsTrending] = useState(false);
   const [prodFormIsBestSeller, setProdFormIsBestSeller] = useState(false);
 
@@ -172,7 +184,7 @@ export default function AdminDashboardPage() {
     setProdFormSku(`KG-SKU-${Math.floor(100 + Math.random() * 900)}`);
     setProdFormDescEn('');
     setProdFormDescBn('');
-    setProdFormImage('https://picsum.photos/seed/newprod/600/600');
+    setProdFormImages(['https://picsum.photos/seed/newprod/600/600']);
     setProdFormIsTrending(true);
     setProdFormIsBestSeller(false);
     setIsProductModalOpen(true);
@@ -190,10 +202,28 @@ export default function AdminDashboardPage() {
     setProdFormSku(product.sku);
     setProdFormDescEn(product.description_en);
     setProdFormDescBn(product.description_bn);
-    setProdFormImage(product.thumbnail_url || product.gallery_urls[0] || '');
+    const existingImages = [product.thumbnail_url, ...(product.gallery_urls || [])]
+      .map((url) => (url || '').trim())
+      .filter((url, index, arr) => Boolean(url) && arr.indexOf(url) === index);
+    setProdFormImages(existingImages.length ? existingImages : ['']);
     setProdFormIsTrending(product.is_trending);
     setProdFormIsBestSeller(product.is_best_seller);
     setIsProductModalOpen(true);
+  };
+
+  const updateProductImage = (index: number, value: string) => {
+    setProdFormImages((prev) => prev.map((url, i) => (i === index ? value : url)));
+  };
+
+  const addProductImage = () => {
+    setProdFormImages((prev) => [...prev, '']);
+  };
+
+  const removeProductImage = (index: number) => {
+    setProdFormImages((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      return next.length ? next : [''];
+    });
   };
 
   /** Surfaces API failures instead of letting a mutation fail silently. */
@@ -259,7 +289,8 @@ export default function AdminDashboardPage() {
 
     const descriptionEn = prodFormDescEn.trim();
     const descriptionBn = prodFormDescBn.trim() || descriptionEn;
-    const image = prodFormImage.trim() || 'https://picsum.photos/seed/khujigo/600/600';
+    const images = prodFormImages.map((url) => url.trim()).filter(Boolean);
+    const image = images[0] || 'https://picsum.photos/seed/khujigo/600/600';
 
     const payload = {
       name_en: prodFormNameEn,
@@ -276,7 +307,7 @@ export default function AdminDashboardPage() {
       short_desc_en: descriptionEn.slice(0, 100),
       short_desc_bn: descriptionBn.slice(0, 100),
       thumbnail_url: image,
-      gallery_urls: [image],
+      gallery_urls: images.slice(1),
       is_trending: prodFormIsTrending,
       is_best_seller: prodFormIsBestSeller,
     };
@@ -396,6 +427,23 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (adminUser?.role === 'STAFF') {
+      showToast('Staff role does not have permission to delete orders.', 'error');
+      return;
+    }
+    if (!confirm(`Permanently delete cancelled order #${orderId}? This cannot be undone.`)) return;
+
+    try {
+      await deleteOrder(orderId);
+      showToast(`Order #${orderId} deleted`, 'success');
+      setSelectedOrder((prev) => (prev && prev.id === orderId ? null : prev));
+      triggerRefresh();
+    } catch (error) {
+      showToast(apiError(error, 'Could not delete the order.'), 'error');
+    }
+  };
+
   // ----------------------------------------------------
   // Categories Tab State
   // ----------------------------------------------------
@@ -489,6 +537,182 @@ export default function AdminDashboardPage() {
       triggerRefresh();
     } catch (error) {
       showToast(apiError(error, 'Could not delete the coupon.'), 'error');
+    }
+  };
+
+  // ----------------------------------------------------
+  // Homepage Promo Section (managed from the Coupons tab)
+  // ----------------------------------------------------
+  // `null` means "not edited yet" so the form falls back to the server value
+  // without an effect copying fetched data into state.
+  const [promoIsActive, setPromoIsActive] = useState<boolean | null>(null);
+  const [promoCouponId, setPromoCouponId] = useState<string | null>(null);
+  const [promoTitleEn, setPromoTitleEn] = useState<string | null>(null);
+  const [promoTitleBn, setPromoTitleBn] = useState<string | null>(null);
+  const [promoDescriptionEn, setPromoDescriptionEn] = useState<string | null>(null);
+  const [promoDescriptionBn, setPromoDescriptionBn] = useState<string | null>(null);
+
+  const promoActive = promoIsActive ?? promoSection?.is_active ?? true;
+  const promoCouponValue = promoCouponId ?? promoSection?.coupon?.id ?? '';
+  const promoTitleEnValue = promoTitleEn ?? promoSection?.title_en ?? '';
+  const promoTitleBnValue = promoTitleBn ?? promoSection?.title_bn ?? '';
+  const promoDescriptionEnValue = promoDescriptionEn ?? promoSection?.description_en ?? '';
+  const promoDescriptionBnValue = promoDescriptionBn ?? promoSection?.description_bn ?? '';
+
+  const handleSavePromoSection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updatePromoSection({
+        isActive: promoActive,
+        couponId: promoCouponValue || null,
+        titleEn: promoTitleEnValue.trim() || null,
+        titleBn: promoTitleBnValue.trim() || null,
+        descriptionEn: promoDescriptionEnValue.trim() || null,
+        descriptionBn: promoDescriptionBnValue.trim() || null,
+      });
+      await refreshPromo();
+      setPromoIsActive(null);
+      setPromoCouponId(null);
+      setPromoTitleEn(null);
+      setPromoTitleBn(null);
+      setPromoDescriptionEn(null);
+      setPromoDescriptionBn(null);
+      showToast('Promo section updated', 'success');
+    } catch (error) {
+      showToast(apiError(error, 'Could not update the promo section.'), 'error');
+    }
+  };
+
+  const handleTogglePromoActive = async () => {
+    const next = !promoActive;
+    setPromoIsActive(next);
+    try {
+      await updatePromoSection({ isActive: next });
+      await refreshPromo();
+      showToast(next ? 'Promo section is now visible' : 'Promo section hidden', 'info');
+    } catch (error) {
+      setPromoIsActive(null);
+      showToast(apiError(error, 'Could not update the promo section.'), 'error');
+    }
+  };
+
+  // ----------------------------------------------------
+  // Banners Tab State
+  // ----------------------------------------------------
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+  const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
+  const [bannerTitleEn, setBannerTitleEn] = useState('');
+  const [bannerTitleBn, setBannerTitleBn] = useState('');
+  const [bannerSubtitleEn, setBannerSubtitleEn] = useState('');
+  const [bannerSubtitleBn, setBannerSubtitleBn] = useState('');
+  const [bannerButtonEn, setBannerButtonEn] = useState('');
+  const [bannerButtonBn, setBannerButtonBn] = useState('');
+  const [bannerButtonUrl, setBannerButtonUrl] = useState('');
+  const [bannerImage, setBannerImage] = useState('');
+  const [bannerBadgeEn, setBannerBadgeEn] = useState('');
+  const [bannerBadgeBn, setBannerBadgeBn] = useState('');
+  const [bannerOrder, setBannerOrder] = useState('');
+  const [bannerIsActive, setBannerIsActive] = useState(true);
+
+  const openAddBannerModal = () => {
+    setEditingBanner(null);
+    setBannerTitleEn('');
+    setBannerTitleBn('');
+    setBannerSubtitleEn('');
+    setBannerSubtitleBn('');
+    setBannerButtonEn('Shop Now');
+    setBannerButtonBn('এখনই শপিং করুন');
+    setBannerButtonUrl('/shop');
+    setBannerImage('https://picsum.photos/seed/newbanner/1200/500');
+    setBannerBadgeEn('');
+    setBannerBadgeBn('');
+    setBannerOrder(String(banners.length + 1));
+    setBannerIsActive(true);
+    setIsBannerModalOpen(true);
+  };
+
+  const openEditBannerModal = (banner: Banner) => {
+    setEditingBanner(banner);
+    setBannerTitleEn(banner.title_en);
+    setBannerTitleBn(banner.title_bn);
+    setBannerSubtitleEn(banner.subtitle_en);
+    setBannerSubtitleBn(banner.subtitle_bn);
+    setBannerButtonEn(banner.button_text_en);
+    setBannerButtonBn(banner.button_text_bn);
+    setBannerButtonUrl(banner.button_url);
+    setBannerImage(banner.image_url);
+    setBannerBadgeEn(banner.badge_en ?? '');
+    setBannerBadgeBn(banner.badge_bn ?? '');
+    setBannerOrder(String(banner.display_order));
+    setBannerIsActive(banner.is_active);
+    setIsBannerModalOpen(true);
+  };
+
+  const handleSaveBanner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const required = [
+      bannerTitleEn,
+      bannerTitleBn,
+      bannerSubtitleEn,
+      bannerSubtitleBn,
+      bannerButtonEn,
+      bannerButtonBn,
+      bannerButtonUrl,
+      bannerImage,
+    ];
+    if (required.some((value) => !value.trim())) {
+      showToast('Please fill in every banner field', 'error');
+      return;
+    }
+
+    const payload = {
+      title_en: bannerTitleEn,
+      title_bn: bannerTitleBn,
+      subtitle_en: bannerSubtitleEn,
+      subtitle_bn: bannerSubtitleBn,
+      button_text_en: bannerButtonEn,
+      button_text_bn: bannerButtonBn,
+      button_url: bannerButtonUrl,
+      image_url: bannerImage,
+      badge_en: bannerBadgeEn,
+      badge_bn: bannerBadgeBn,
+      display_order: parseInt(bannerOrder, 10) || 0,
+      is_active: bannerIsActive,
+    };
+
+    try {
+      if (editingBanner) {
+        await updateBanner(editingBanner.id, payload);
+        showToast('Banner updated successfully', 'success');
+      } else {
+        await createBanner(payload);
+        showToast('Banner created successfully', 'success');
+      }
+      setIsBannerModalOpen(false);
+      triggerRefresh();
+    } catch (error) {
+      showToast(apiError(error, 'Could not save the banner.'), 'error');
+    }
+  };
+
+  const handleToggleBanner = async (banner: Banner) => {
+    try {
+      await updateBanner(banner.id, { is_active: !banner.is_active });
+      showToast(banner.is_active ? 'Banner hidden' : 'Banner is now live', 'info');
+      triggerRefresh();
+    } catch (error) {
+      showToast(apiError(error, 'Could not update the banner.'), 'error');
+    }
+  };
+
+  const handleDeleteBanner = async (banner: Banner) => {
+    if (!confirm(`Delete the banner "${banner.title_en}"? This cannot be undone.`)) return;
+    try {
+      await deleteBanner(banner.id);
+      showToast('Banner deleted', 'success');
+      triggerRefresh();
+    } catch (error) {
+      showToast(apiError(error, 'Could not delete the banner.'), 'error');
     }
   };
 
@@ -747,6 +971,26 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => {
+              setActiveTab('banners');
+              setIsMobileMenuOpen(false);
+            }}
+            className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
+              activeTab === 'banners'
+                ? 'bg-brand-orange text-white shadow-lg shadow-orange-950/50'
+                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Images className="w-4 h-4" />
+              <span>Homepage Banners</span>
+            </div>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+              {banners.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
               setActiveTab('coupons');
               setIsMobileMenuOpen(false);
             }}
@@ -867,6 +1111,7 @@ export default function AdminDashboardPage() {
                 {activeTab === 'products' && 'Catalog & Inventory Management'}
                 {activeTab === 'orders' && 'Order Processing & Dispatch'}
                 {activeTab === 'categories' && 'Category Taxonomy'}
+                {activeTab === 'banners' && 'Homepage Banner Slides'}
                 {activeTab === 'coupons' && 'Promotions & Coupons'}
                 {activeTab === 'reviews' && 'Customer Reviews'}
                 {activeTab === 'settings' && 'Store Configuration'}
@@ -904,6 +1149,16 @@ export default function AdminDashboardPage() {
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">Add Category</span>
+              </button>
+            )}
+
+            {activeTab === 'banners' && (
+              <button
+                onClick={openAddBannerModal}
+                className="px-3 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-md transition"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Add Banner</span>
               </button>
             )}
 
@@ -1483,6 +1738,16 @@ export default function AdminDashboardPage() {
                               >
                                 <Eye className="w-3.5 h-3.5" />
                               </button>
+
+                              {ord.order_status === 'CANCELLED' && (
+                                <button
+                                  onClick={() => handleDeleteOrder(ord.id)}
+                                  title="Delete cancelled order"
+                                  className="p-1.5 text-rose-400 hover:text-rose-300 hover:bg-slate-800 rounded-lg transition"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -1531,10 +1796,214 @@ export default function AdminDashboardPage() {
           )}
 
           {/* ---------------------------------------------------- */}
-          {/* TAB 5: COUPONS & DEALS */}
+          {/* TAB 5: HOMEPAGE BANNERS */}
+          {/* ---------------------------------------------------- */}
+          {activeTab === 'banners' && (
+            <div className="space-y-4">
+              <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Images className="w-4 h-4 text-brand-orange" />
+                  <span>Hero Slider Slides</span>
+                </h3>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  These slides rotate on the storefront home page in display order. Hidden slides
+                  stay here but are never shown to customers.
+                </p>
+              </div>
+
+              {banners.length === 0 ? (
+                <div className="p-8 bg-slate-950 border border-dashed border-slate-800 rounded-2xl text-center">
+                  <p className="text-xs text-slate-400">
+                    No banners yet. Add one to populate the home page hero.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {banners.map((b) => (
+                    <div
+                      key={b.id}
+                      className="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden"
+                    >
+                      <div className="relative h-40 bg-slate-900">
+                        <Image
+                          src={b.image_url}
+                          alt={b.title_en}
+                          fill
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                          className="object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute top-2 left-2 flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-black/60 text-white">
+                            #{b.display_order}
+                          </span>
+                          <button
+                            onClick={() => handleToggleBanner(b)}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                              b.is_active
+                                ? 'bg-emerald-500/80 text-white border-emerald-400'
+                                : 'bg-slate-800/80 text-slate-300 border-slate-600'
+                            }`}
+                          >
+                            {b.is_active ? 'LIVE' : 'HIDDEN'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-2">
+                        {b.badge_en && (
+                          <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                            {b.badge_en}
+                          </span>
+                        )}
+                        <p className="text-xs font-bold text-white leading-snug">{b.title_en}</p>
+                        <p className="text-[11px] text-slate-400 leading-snug">{b.subtitle_en}</p>
+                        <p className="text-[10px] text-slate-500 font-mono truncate">
+                          {b.button_text_en} → {b.button_url}
+                        </p>
+
+                        <div className="flex items-center gap-2 pt-2 border-t border-slate-800/80">
+                          <button
+                            onClick={() => openEditBannerModal(b)}
+                            className="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                            <span>Edit</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteBanner(b)}
+                            className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold rounded-xl border border-rose-500/30 transition"
+                            title="Delete banner"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ---------------------------------------------------- */}
+          {/* TAB 6: COUPONS & DEALS */}
           {/* ---------------------------------------------------- */}
           {activeTab === 'coupons' && (
             <div className="space-y-4">
+              {/* Homepage "Exclusive Promo Code" section controls */}
+              <div className="p-5 bg-slate-950 border border-slate-800 rounded-2xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Homepage Promo Section</h3>
+                    <p className="text-[11px] text-slate-400 mt-1">
+                      Controls the &ldquo;Exclusive Promo Code&rdquo; banner on the shopfront. Pick the
+                      coupon to feature — its code and discount drive the section.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleTogglePromoActive}
+                    className={`shrink-0 text-[11px] font-bold px-3 py-1.5 rounded-full border ${
+                      promoActive
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                        : 'bg-slate-800 text-slate-500 border-slate-700'
+                    }`}
+                  >
+                    {promoActive ? 'ACTIVE' : 'INACTIVE'}
+                  </button>
+                </div>
+
+                <form onSubmit={handleSavePromoSection} className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Featured Coupon
+                      </label>
+                      <select
+                        value={promoCouponValue}
+                        onChange={(e) => setPromoCouponId(e.target.value)}
+                        className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-orange"
+                      >
+                        <option value="">No coupon</option>
+                        {coupons.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.code} —{' '}
+                            {c.discount_type === 'FIXED'
+                              ? `৳${c.discount_value} off`
+                              : `${c.discount_value}% off`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Custom Headline (EN, optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={promoTitleEnValue}
+                        onChange={(e) => setPromoTitleEn(e.target.value)}
+                        placeholder="Get Flat ৳100 Off on First Order!"
+                        className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-orange"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Custom Headline (বাংলা, optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={promoTitleBnValue}
+                        onChange={(e) => setPromoTitleBn(e.target.value)}
+                        placeholder="প্রথম অর্ডারে ফ্ল্যাট ৳১০০ ছাড়!"
+                        className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-orange"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Custom Description (EN, optional)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={promoDescriptionEnValue}
+                        onChange={(e) => setPromoDescriptionEn(e.target.value)}
+                        placeholder="Use this coupon on any order over ৳1,000."
+                        className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-orange"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Custom Description (বাংলা, optional)
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={promoDescriptionBnValue}
+                        onChange={(e) => setPromoDescriptionBn(e.target.value)}
+                        placeholder="যেকোনো ৳১,০০০ বা তার বেশি অর্ডারে কুপনটি ব্যবহার করুন।"
+                        className="w-full px-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-brand-orange"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500">
+                    Leave the copy blank to auto-generate it from the selected coupon.
+                  </p>
+
+                  <button
+                    type="submit"
+                    className="px-4 py-2.5 bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-md transition"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Save Promo Section</span>
+                  </button>
+                </form>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {coupons.map((c) => (
                   <div
@@ -1966,14 +2435,47 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Image URL</label>
-                <input
-                  type="url"
-                  value={prodFormImage}
-                  onChange={(e) => setProdFormImage(e.target.value)}
-                  placeholder="https://picsum.photos/seed/gadget/600/600"
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:border-brand-orange focus:outline-none"
-                />
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-slate-300 font-semibold">Product Images</label>
+                  <span className="text-slate-500 text-[10px]">First image is the main thumbnail</span>
+                </div>
+                <div className="space-y-2">
+                  {prodFormImages.map((url, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <input
+                        type="url"
+                        value={url}
+                        onChange={(e) => updateProductImage(index, e.target.value)}
+                        placeholder={
+                          index === 0
+                            ? 'https://picsum.photos/seed/gadget/600/600'
+                            : 'https://picsum.photos/seed/gadget-2/600/600'
+                        }
+                        className="flex-1 min-w-0 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:border-brand-orange focus:outline-none"
+                      />
+                      {index === 0 && (
+                        <span className="shrink-0 text-[10px] uppercase tracking-wide text-brand-orange font-semibold">Main</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeProductImage(index)}
+                        title="Remove image"
+                        aria-label="Remove image"
+                        className="shrink-0 p-2 rounded-xl border border-slate-700 text-slate-400 hover:text-red-400 hover:border-red-400/50 transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={addProductImage}
+                  className="mt-2 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-dashed border-slate-600 text-slate-300 hover:border-brand-orange hover:text-brand-orange font-semibold transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Image
+                </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -2137,6 +2639,16 @@ export default function AdminDashboardPage() {
                     {selectedOrder.payment_status} (Click to toggle)
                   </button>
                 </div>
+
+                {selectedOrder.order_status === 'CANCELLED' && (
+                  <button
+                    onClick={() => handleDeleteOrder(selectedOrder.id)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete Order
+                  </button>
+                )}
               </div>
 
               {selectedOrder.payment_reference && (
@@ -2397,6 +2909,202 @@ export default function AdminDashboardPage() {
                   className="px-5 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white rounded-xl font-bold"
                 >
                   Create Coupon
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================ */}
+      {/* 8. MODAL: ADD / EDIT HOMEPAGE BANNER */}
+      {/* ============================================================ */}
+      {isBannerModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-slate-950 border border-slate-800 rounded-3xl max-w-2xl w-full p-6 text-white my-3 sm:my-8 max-h-[calc(100dvh-1.5rem)] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <h3 className="text-sm font-bold text-white">
+                {editingBanner ? 'Edit Homepage Banner' : 'Create Homepage Banner'}
+              </h3>
+              <button
+                onClick={() => setIsBannerModalOpen(false)}
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBanner} className="space-y-3 mt-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Title (EN) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={bannerTitleEn}
+                    onChange={(e) => setBannerTitleEn(e.target.value)}
+                    placeholder="Discover Trending Smart Gadgets"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Title (বাংলা) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={bannerTitleBn}
+                    onChange={(e) => setBannerTitleBn(e.target.value)}
+                    placeholder="ট্রেন্ডিং গ্যাজেট কালেকশন"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Subtitle (EN) *</label>
+                  <textarea
+                    rows={2}
+                    required
+                    value={bannerSubtitleEn}
+                    onChange={(e) => setBannerSubtitleEn(e.target.value)}
+                    placeholder="Top trending items delivered to your doorstep."
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Subtitle (বাংলা) *</label>
+                  <textarea
+                    rows={2}
+                    required
+                    value={bannerSubtitleBn}
+                    onChange={(e) => setBannerSubtitleBn(e.target.value)}
+                    placeholder="ইউনিক ও দরকারি সব ট্রেন্ডিং প্রোডাক্ট।"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Button Text (EN) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={bannerButtonEn}
+                    onChange={(e) => setBannerButtonEn(e.target.value)}
+                    placeholder="Shop Now"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Button Text (বাংলা) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={bannerButtonBn}
+                    onChange={(e) => setBannerButtonBn(e.target.value)}
+                    placeholder="এখনই শপিং করুন"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Button Link *</label>
+                <input
+                  type="text"
+                  required
+                  value={bannerButtonUrl}
+                  onChange={(e) => setBannerButtonUrl(e.target.value)}
+                  placeholder="/shop?filter=trending"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1">Image URL *</label>
+                <input
+                  type="url"
+                  required
+                  value={bannerImage}
+                  onChange={(e) => setBannerImage(e.target.value)}
+                  placeholder="https://picsum.photos/seed/banner/1200/500"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                />
+                {bannerImage.trim() && (
+                  <div className="relative h-32 mt-2 rounded-xl overflow-hidden border border-slate-800 bg-slate-900">
+                    <Image
+                      src={bannerImage}
+                      alt="Banner preview"
+                      fill
+                      sizes="640px"
+                      className="object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Badge (EN, optional)</label>
+                  <input
+                    type="text"
+                    value={bannerBadgeEn}
+                    onChange={(e) => setBannerBadgeEn(e.target.value)}
+                    placeholder="Mega Trending Offer"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Badge (বাংলা, optional)</label>
+                  <input
+                    type="text"
+                    value={bannerBadgeBn}
+                    onChange={(e) => setBannerBadgeBn(e.target.value)}
+                    placeholder="ট্রেন্ডিং ধামাকা অফার"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:items-center">
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">Display Order</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={bannerOrder}
+                    onChange={(e) => setBannerOrder(e.target.value)}
+                    placeholder="1"
+                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-brand-orange"
+                  />
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer sm:mt-5">
+                  <input
+                    type="checkbox"
+                    checked={bannerIsActive}
+                    onChange={(e) => setBannerIsActive(e.target.checked)}
+                    className="w-4 h-4 accent-brand-orange"
+                  />
+                  <span className="text-slate-300 font-semibold">Visible on storefront</span>
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsBannerModalOpen(false)}
+                  className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-brand-orange hover:bg-brand-orange-hover text-white rounded-xl font-bold"
+                >
+                  {editingBanner ? 'Save Changes' : 'Create Banner'}
                 </button>
               </div>
             </form>

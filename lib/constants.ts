@@ -21,6 +21,12 @@ export const CONTACT_INFO = {
   workingHours_en: '9:00 AM - 10:00 PM (Everyday)',
 };
 
+// Only these customer emails see the admin-panel shortcuts in the storefront.
+export const ADMIN_PANEL_EMAILS = [
+  'tanvirhaidersayem@gmail.com',
+  'taysarsiyam@gmail.com',
+];
+
 export const DEFAULT_DELIVERY_RATES = {
   insideDhaka: 60,
   outsideDhaka: 120,

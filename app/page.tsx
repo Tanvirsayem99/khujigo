@@ -2,21 +2,31 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { ArrowRight, Flame, Sparkles, Award, Tag, Check, Copy } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { useProducts } from '@/lib/hooks/api';
-import { ProductGridSkeleton, SectionError } from '@/components/common/LoadingStates';
-import HeroBanner from '@/components/storefront/HeroBanner';
+import { useProducts, usePromoSection } from '@/lib/hooks/api';
+import { BannerSkeleton, ProductGridSkeleton, SectionError } from '@/components/common/LoadingStates';
 import CategoryBubbles from '@/components/storefront/CategoryBubbles';
 import FlashDealsSection from '@/components/storefront/FlashDealsSection';
 import ProductCard from '@/components/storefront/ProductCard';
 import TrustBadges from '@/components/storefront/TrustBadges';
 import CustomerReviewsSection from '@/components/storefront/CustomerReviewsSection';
 
+// Lazy-loaded so the hero's code (and its banner fetch) is split out of the
+// initial page bundle; the skeleton holds the layout while the chunk loads.
+const HeroBanner = dynamic(() => import('@/components/storefront/HeroBanner'), {
+  loading: () => <BannerSkeleton />,
+});
+
 export default function HomePage() {
   const { language, showToast } = useApp();
   const [activeTab, setActiveTab] = useState<'trending' | 'best_seller' | 'new_arrival'>('trending');
   const [couponCopied, setCouponCopied] = useState(false);
+
+  // Admin-controlled "Exclusive Promo Code" section.
+  const { promo: promoSection } = usePromoSection();
+  const promoCoupon = promoSection?.coupon;
 
   // Only the visible tab is fetched up front; the other two load on first visit.
   // `trending` stays enabled because it doubles as the empty-state fallback.
@@ -53,8 +63,33 @@ export default function HomePage() {
     setTimeout(() => setCouponCopied(false), 3000);
   };
 
+  // Copy falls back to the featured coupon when the admin left it blank.
+  const promoTitle = promoCoupon
+    ? language === 'bn'
+      ? promoSection?.title_bn ||
+        (promoCoupon.discount_type === 'FIXED'
+          ? `অর্ডারে ফ্ল্যাট ৳${promoCoupon.discount_value} ছাড়!`
+          : `অর্ডারে ${promoCoupon.discount_value}% ছাড়!`)
+      : promoSection?.title_en ||
+        (promoCoupon.discount_type === 'FIXED'
+          ? `Get Flat ৳${promoCoupon.discount_value} Off on Your Order!`
+          : `Get ${promoCoupon.discount_value}% Off on Your Order!`)
+    : '';
+
+  const promoDescription = promoCoupon
+    ? language === 'bn'
+      ? promoSection?.description_bn ||
+        (promoCoupon.min_order_amount > 0
+          ? `যেকোনো ৳${promoCoupon.min_order_amount} বা তার বেশি অর্ডারে কুপনটি ব্যবহার করুন। চেকআউট পেজে কোডটি লিখুন।`
+          : 'চেকআউটে কুপনটি ব্যবহার করে সাথে সাথে সাশ্রয় করুন।')
+      : promoSection?.description_en ||
+        (promoCoupon.min_order_amount > 0
+          ? `Use this coupon on any order over ৳${promoCoupon.min_order_amount}. Enter code at checkout for instant savings.`
+          : 'Use this coupon at checkout for instant savings.')
+    : '';
+
   return (
-    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-10 sm:space-y-14">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col gap-8 sm:gap-14">
       {/* Hero Banner Slider */}
       <HeroBanner />
 
@@ -143,35 +178,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Promotional Banner Callout (Bangladeshi Coupon) */}
-      <section className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-brand-orange rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-2 text-center md:text-left z-10">
-          <span className="px-3 py-1 rounded-full bg-black/20 text-white text-[11px] font-black uppercase tracking-wider inline-block">
-            {language === 'bn' ? 'বিশেষ ডিসকাউন্ট অফার' : 'Exclusive Promo Code'}
-          </span>
-          <h3 className="text-2xl sm:text-3xl font-black tracking-tight">
-            {language === 'bn' ? 'প্রথম অর্ডারে ফ্ল্যাট ১০০ টাকা ডিসকাউন্ট!' : 'Get Flat ৳100 Off on First Order!'}
-          </h3>
-          <p className="text-xs sm:text-sm text-white/90 max-w-xl font-medium">
-            {language === 'bn'
-              ? 'যেকোনো ৳১,০০০ বা তার বেশি অর্ডারে কুপনটি ব্যবহার করুন। চেকআউট পেজে কোডটি লিখুন।'
-              : 'Use this coupon on any order over ৳1,000. Enter code at checkout for instant savings.'}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 z-10 bg-white/10 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-white/30">
-          <div className="px-4 py-2 bg-white text-brand-navy rounded-xl font-mono font-black text-sm sm:text-base tracking-widest shadow-xs">
-            KHUJIGO100
+      {/* Promotional Banner Callout — shown only when the admin enables it and
+          picks a coupon; the copy comes from that coupon unless overridden. */}
+      {promoSection?.is_active && promoCoupon && (
+        <section className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-brand-orange rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-2 text-center md:text-left z-10">
+            <span className="px-3 py-1 rounded-full bg-black/20 text-white text-[11px] font-black uppercase tracking-wider inline-block">
+              {language === 'bn' ? 'বিশেষ ডিসকাউন্ট অফার' : 'Exclusive Promo Code'}
+            </span>
+            <h3 className="text-2xl sm:text-3xl font-black tracking-tight">{promoTitle}</h3>
+            <p className="text-xs sm:text-sm text-white/90 max-w-xl font-medium">
+              {promoDescription}
+            </p>
           </div>
-          <button
-            onClick={() => copyCoupon('KHUJIGO100')}
-            className="px-4 py-2.5 rounded-xl bg-brand-navy hover:bg-black text-white text-xs font-bold transition flex items-center gap-1.5"
-          >
-            {couponCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-            <span>{couponCopied ? (language === 'bn' ? 'কপি হয়েছে' : 'Copied') : (language === 'bn' ? 'কপি করুন' : 'Copy')}</span>
-          </button>
-        </div>
-      </section>
+
+          <div className="flex flex-wrap items-center gap-3 z-10 bg-white/10 backdrop-blur-md p-2 sm:p-2.5 rounded-2xl border border-white/30">
+            <div className="px-4 py-2 bg-white text-brand-navy rounded-xl font-mono font-black text-sm sm:text-base tracking-widest shadow-xs">
+              {promoCoupon.code}
+            </div>
+            <button
+              onClick={() => copyCoupon(promoCoupon.code)}
+              className="px-4 py-2.5 rounded-xl bg-brand-navy hover:bg-black text-white text-xs font-bold transition flex items-center gap-1.5"
+            >
+              {couponCopied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+              <span>{couponCopied ? (language === 'bn' ? 'কপি হয়েছে' : 'Copied') : (language === 'bn' ? 'কপি করুন' : 'Copy')}</span>
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Customer Reviews Section */}
       <CustomerReviewsSection />

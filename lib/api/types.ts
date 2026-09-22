@@ -178,6 +178,33 @@ export interface ApiCoupon {
   isActive: boolean;
 }
 
+export interface ApiBanner {
+  id: string;
+  titleEn: string;
+  titleBn: string;
+  subtitleEn: string;
+  subtitleBn: string;
+  buttonTextEn: string;
+  buttonTextBn: string;
+  buttonUrl: string;
+  imageUrl: string;
+  badgeEn: string | null;
+  badgeBn: string | null;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+export interface ApiPromoSection {
+  id: string;
+  isActive: boolean;
+  couponId: string | null;
+  titleEn: string | null;
+  titleBn: string | null;
+  descriptionEn: string | null;
+  descriptionBn: string | null;
+  coupon: ApiCoupon | null;
+}
+
 export interface ApiDeliverySettings {
   id: string;
   insideDhaka: number;

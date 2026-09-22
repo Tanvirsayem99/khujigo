@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { InlineSpinner } from '@/components/common/LoadingStates';
+import OrderStatusBadge from '@/components/storefront/OrderStatusBadge';
+import OrderTrackingStepper from '@/components/storefront/OrderTrackingStepper';
 import { useOrder } from '@/lib/hooks/api';
 import { formatPriceBD, toBanglaNumber } from '@/lib/bangladesh-data';
 import { CONTACT_INFO } from '@/lib/constants';
@@ -142,6 +144,14 @@ export default function OrderSuccessPage() {
         </div>
       </div>
 
+      {/* Live Order Tracking */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xl">
+        <h2 className="text-sm font-bold text-brand-navy mb-6 text-center">
+          {language === 'bn' ? 'অর্ডার ট্র্যাকিং' : 'Order Tracking'}
+        </h2>
+        <OrderTrackingStepper status={order.order_status} />
+      </div>
+
       {/* Invoice Receipt Paper Card */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xl space-y-6 print:border-none print:shadow-none">
         {/* Receipt Header */}
@@ -186,9 +196,7 @@ export default function OrderSuccessPage() {
                 ? (language === 'bn' ? 'ক্যাশ অন ডেলিভারি (পণ্য পেয়ে টাকা দিন)' : 'Cash on Delivery (COD)')
                 : `${order.payment_method} Payment`}
             </p>
-            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-              {language === 'bn' ? 'অর্ডার প্রক্রিয়াধীন (Pending)' : 'Processing (Pending)'}
-            </span>
+            <OrderStatusBadge status={order.order_status} />
             {order.payment_reference && (
               <p className="text-xs text-gray-500">
                 {language === 'bn' ? 'ট্রানজেকশন আইডি' : 'Transaction ID'}:{' '}

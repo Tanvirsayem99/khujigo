@@ -1,5 +1,6 @@
 import type {
   AdminRole,
+  Banner,
   Category,
   Coupon,
   DeliverySettings,
@@ -9,12 +10,15 @@ import type {
   PaymentMethod,
   PaymentStatus,
   Product,
+  PromoSection,
   Review,
   ReviewStatus,
 } from '@/types';
 import type { CustomerUser } from '@/context/AuthContext';
 import { apiRequest } from './client';
 import {
+  toBanner,
+  toBannerPayload,
   toCategory,
   toCategoryPayload,
   toCoupon,
@@ -25,11 +29,13 @@ import {
   toOrder,
   toProduct,
   toProductPayload,
+  toPromoSection,
   toReview,
 } from './mappers';
 import type {
   ApiAdmin,
   ApiAnalytics,
+  ApiBanner,
   ApiCategory,
   ApiCoupon,
   ApiCouponValidation,
@@ -37,6 +43,7 @@ import type {
   ApiDeliverySettings,
   ApiOrder,
   ApiProduct,
+  ApiPromoSection,
   ApiReview,
   ApiUser,
   AuthTokens,
@@ -129,6 +136,23 @@ export async function getDeliverySettings(): Promise<DeliverySettings> {
   return toDeliverySettings(
     await apiRequest<ApiDeliverySettings>('/delivery-settings'),
   );
+}
+
+export async function getPromoSection(): Promise<PromoSection> {
+  return toPromoSection(await apiRequest<ApiPromoSection>('/promo-section'));
+}
+
+/** Active hero banners in display order — what the storefront renders. */
+export async function listBanners(): Promise<Banner[]> {
+  const banners = await apiRequest<ApiBanner[]>('/banners');
+  return banners.map(toBanner);
+}
+
+export async function listAdminBanners(): Promise<Banner[]> {
+  const banners = await apiRequest<ApiBanner[]>('/banners/admin/all', {
+    auth: 'admin',
+  });
+  return banners.map(toBanner);
 }
 
 // =========================================================================
@@ -333,6 +357,14 @@ export async function updateOrderPaymentStatus(
   );
 }
 
+/** Permanently removes a cancelled order (and its items) from the database. */
+export async function deleteOrder(id: string): Promise<void> {
+  await apiRequest(`/orders/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    auth: 'admin',
+  });
+}
+
 // =========================================================================
 // Admin catalog writes & analytics
 // =========================================================================
@@ -416,6 +448,60 @@ export async function updateDeliverySettings(
       auth: 'admin',
     }),
   );
+}
+
+/** `null` clears a value server-side (e.g. deselecting the coupon). */
+export interface PromoSectionUpdate {
+  isActive?: boolean;
+  couponId?: string | null;
+  titleEn?: string | null;
+  titleBn?: string | null;
+  descriptionEn?: string | null;
+  descriptionBn?: string | null;
+}
+
+export async function updatePromoSection(
+  input: PromoSectionUpdate,
+): Promise<PromoSection> {
+  return toPromoSection(
+    await apiRequest<ApiPromoSection>('/promo-section', {
+      method: 'PATCH',
+      body: input,
+      auth: 'admin',
+    }),
+  );
+}
+
+export async function createBanner(
+  input: Record<string, unknown>,
+): Promise<Banner> {
+  return toBanner(
+    await apiRequest<ApiBanner>('/banners', {
+      method: 'POST',
+      body: toBannerPayload(input),
+      auth: 'admin',
+    }),
+  );
+}
+
+export async function updateBanner(
+  id: string,
+  input: Record<string, unknown>,
+): Promise<Banner> {
+  return toBanner(
+    await apiRequest<ApiBanner>(`/banners/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: toBannerPayload(input),
+      auth: 'admin',
+    }),
+  );
+}
+
+export async function deleteBanner(id: string): Promise<void> {
+  await apiRequest(`/banners/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    auth: 'admin',
+  });
 }
 
 // =========================================================================

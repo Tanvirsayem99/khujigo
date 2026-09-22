@@ -8,12 +8,14 @@ import Logo from '@/components/common/Logo';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { useApp } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
-import { NAV_LINKS, CONTACT_INFO } from '@/lib/constants';
+import { NAV_LINKS, CONTACT_INFO, formatBDT, ADMIN_PANEL_EMAILS } from '@/lib/constants';
+import { useDeliverySettings } from '@/lib/hooks/api';
 
 export default function Navbar() {
   const router = useRouter();
   const { language, t, cartCount, cartTotal, wishlist, setIsCartOpen } = useApp();
   const { customer, isCustomerLoggedIn, logoutCustomer, isAdminLoggedIn, adminUser } = useAuth();
+  const { settings: deliverySettings } = useDeliverySettings();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -50,6 +52,16 @@ export default function Navbar() {
     }
   };
 
+  const freeDeliveryText = t.freeDeliveryText.replace(
+    '{amount}',
+    formatBDT(deliverySettings?.freeDeliveryThreshold ?? 2500, language === 'bn'),
+  );
+
+  // The admin-panel shortcuts are only exposed to a small allow-list of
+  // customer accounts, not to every storefront visitor.
+  const canAccessAdminPanel =
+    !!customer?.email && ADMIN_PANEL_EMAILS.includes(customer.email.trim().toLowerCase());
+
   return (
     <header className="sticky top-0 z-40 w-full shadow-xs">
       {/* 1. Top Announcement Bar */}
@@ -70,12 +82,14 @@ export default function Navbar() {
               <Phone className="w-3 h-3 text-[#FF6A00]" />
               <span>{CONTACT_INFO.hotline}</span>
             </a>
-            <Link
-              href="/admin"
-              className="px-2.5 py-0.5 rounded bg-gray-800 hover:bg-[#FF6A00] text-gray-200 hover:text-white transition font-medium text-[10px] tracking-wide"
-            >
-              {t.adminDashboard}
-            </Link>
+            {canAccessAdminPanel && (
+              <Link
+                href="/admin"
+                className="px-2.5 py-0.5 rounded bg-gray-800 hover:bg-[#FF6A00] text-gray-200 hover:text-white transition font-medium text-[10px] tracking-wide"
+              >
+                {t.adminDashboard}
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -248,19 +262,23 @@ export default function Navbar() {
                     </>
                   )}
 
-                  <div className="h-px bg-gray-100 my-1.5" />
-                  <Link
-                    href={isAdminLoggedIn ? '/admin' : '/admin-login'}
-                    onClick={() => setAccountMenuOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-brand-orange hover:bg-orange-50 font-medium text-[11px]"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                    <span>
-                      {isAdminLoggedIn
-                        ? `${t.adminDashboard} (${adminUser?.role})`
-                        : `${t.adminDashboard} (লগইন)`}
-                    </span>
-                  </Link>
+                  {canAccessAdminPanel && (
+                    <>
+                      <div className="h-px bg-gray-100 my-1.5" />
+                      <Link
+                        href={isAdminLoggedIn ? '/admin' : '/admin-login'}
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-brand-orange hover:bg-orange-50 font-medium text-[11px]"
+                      >
+                        <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                        <span>
+                          {isAdminLoggedIn
+                            ? `${t.adminDashboard} (${adminUser?.role})`
+                            : `${t.adminDashboard} (লগইন)`}
+                        </span>
+                      </Link>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -320,7 +338,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4 py-2 text-xs text-gray-600">
             <span className="flex items-center gap-1 text-[#FF6A00] font-bold">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{t.freeDeliveryText}</span>
+              <span>{freeDeliveryText}</span>
             </span>
           </div>
         </div>
@@ -426,13 +444,15 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
-              <Link
-                href={isAdminLoggedIn ? '/admin' : '/admin-login'}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-xl text-xs font-bold text-[#FF6A00] bg-orange-50"
-              >
-                {t.adminDashboard} {isAdminLoggedIn ? `(${adminUser?.role})` : ''}
-              </Link>
+              {canAccessAdminPanel && (
+                <Link
+                  href={isAdminLoggedIn ? '/admin' : '/admin-login'}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-xl text-xs font-bold text-[#FF6A00] bg-orange-50"
+                >
+                  {t.adminDashboard} {isAdminLoggedIn ? `(${adminUser?.role})` : ''}
+                </Link>
+              )}
             </div>
           </div>
 

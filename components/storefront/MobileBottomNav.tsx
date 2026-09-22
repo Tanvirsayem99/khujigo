@@ -41,7 +41,9 @@ export default function MobileBottomNav() {
       <div className="grid grid-cols-5 h-[4.25rem]">
         {navItems.map((item, idx) => {
           const Icon = item.icon;
-          const isActive = item.href ? pathname === item.href : false;
+          const isActive = item.href
+            ? pathname === item.href || pathname.startsWith(`${item.href}/`)
+            : false;
 
           if (item.action === 'cart') {
             return (

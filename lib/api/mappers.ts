@@ -1,10 +1,12 @@
 import type {
+  Banner,
   Category,
   Coupon,
   DeliverySettings,
   Order,
   OrderItem,
   Product,
+  PromoSection,
   Review,
   AdminUser,
   ManagedUser,
@@ -12,6 +14,7 @@ import type {
 import type { CustomerUser } from '@/context/AuthContext';
 import type {
   ApiAdmin,
+  ApiBanner,
   ApiCategory,
   ApiCoupon,
   ApiCustomer,
@@ -19,6 +22,7 @@ import type {
   ApiOrder,
   ApiOrderItem,
   ApiProduct,
+  ApiPromoSection,
   ApiReview,
   ApiSpecification,
   ApiUser,
@@ -155,6 +159,35 @@ export function toCoupon(c: ApiCoupon): Coupon {
   };
 }
 
+export function toBanner(b: ApiBanner): Banner {
+  return {
+    id: b.id,
+    title_en: b.titleEn,
+    title_bn: b.titleBn,
+    subtitle_en: b.subtitleEn,
+    subtitle_bn: b.subtitleBn,
+    button_text_en: b.buttonTextEn,
+    button_text_bn: b.buttonTextBn,
+    button_url: b.buttonUrl,
+    image_url: b.imageUrl,
+    badge_en: b.badgeEn ?? undefined,
+    badge_bn: b.badgeBn ?? undefined,
+    display_order: b.displayOrder,
+    is_active: b.isActive,
+  };
+}
+
+export function toPromoSection(s: ApiPromoSection): PromoSection {
+  return {
+    is_active: s.isActive,
+    coupon: s.coupon ? toCoupon(s.coupon) : undefined,
+    title_en: s.titleEn ?? undefined,
+    title_bn: s.titleBn ?? undefined,
+    description_en: s.descriptionEn ?? undefined,
+    description_bn: s.descriptionBn ?? undefined,
+  };
+}
+
 /** Delivery settings are already camelCase on both sides. */
 export function toDeliverySettings(s: ApiDeliverySettings): DeliverySettings {
   return {
@@ -252,6 +285,19 @@ const CATEGORY_FIELDS: Record<string, string> = {
   is_active: 'isActive',
 };
 
+const BANNER_FIELDS: Record<string, string> = {
+  title_en: 'titleEn',
+  title_bn: 'titleBn',
+  subtitle_en: 'subtitleEn',
+  subtitle_bn: 'subtitleBn',
+  button_text_en: 'buttonTextEn',
+  button_text_bn: 'buttonTextBn',
+  button_url: 'buttonUrl',
+  image_url: 'imageUrl',
+  display_order: 'displayOrder',
+  is_active: 'isActive',
+};
+
 const COUPON_FIELDS: Record<string, string> = {
   code: 'code',
   discount_type: 'discountType',
@@ -308,4 +354,17 @@ export function toCouponPayload(
   input: Record<string, unknown>,
 ): Record<string, unknown> {
   return pick(input, COUPON_FIELDS);
+}
+
+export function toBannerPayload(
+  input: Record<string, unknown>,
+): Record<string, unknown> {
+  const payload = pick(input, BANNER_FIELDS);
+
+  // Badges are optional and `pick` drops empty strings, so an emptied badge
+  // would silently keep its old value on update. Send null to clear it.
+  if ('badge_en' in input) payload.badgeEn = input.badge_en ? input.badge_en : null;
+  if ('badge_bn' in input) payload.badgeBn = input.badge_bn ? input.badge_bn : null;
+
+  return payload;
 }

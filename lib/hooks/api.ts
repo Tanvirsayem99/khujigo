@@ -81,6 +81,25 @@ export function useDeliverySettings() {
   return { settings: data, isLoading, error, refresh };
 }
 
+export function useBanners() {
+  const { data, error, isLoading, mutate: refresh } = useSWR(
+    ['banners'],
+    () => api.listBanners(),
+  );
+
+  return { banners: data ?? [], isLoading, error, refresh };
+}
+
+export function usePromoSection(options: { enabled?: boolean } = {}) {
+  const enabled = options.enabled ?? true;
+  const { data, error, isLoading, mutate: refresh } = useSWR(
+    enabled ? ['promo'] : null,
+    () => api.getPromoSection(),
+  );
+
+  return { promo: data, isLoading, error, refresh };
+}
+
 // ------------------------------------------------------------------ reviews
 
 export function useStoreReviews(limit = 4) {
@@ -103,10 +122,11 @@ export function useProductReviews(productId?: string) {
 
 // ------------------------------------------------------------------- orders
 
-export function useOrder(id?: string) {
+export function useOrder(id?: string, options: { refreshInterval?: number } = {}) {
   const { data, error, isLoading, mutate: refresh } = useSWR(
     id ? ['order', id] : null,
     () => api.getOrder(id as string),
+    options.refreshInterval ? { refreshInterval: options.refreshInterval } : undefined,
   );
 
   return { order: data, isLoading, error, refresh };
@@ -152,6 +172,16 @@ export function useAdminCategories(options: { enabled?: boolean } = {}) {
   );
 
   return { categories: data ?? [], isLoading, error, refresh };
+}
+
+export function useAdminBanners(options: { enabled?: boolean } = {}) {
+  const enabled = options.enabled ?? true;
+  const { data, error, isLoading, mutate: refresh } = useSWR(
+    enabled ? [ADMIN, 'banners'] : null,
+    () => api.listAdminBanners(),
+  );
+
+  return { banners: data ?? [], isLoading, error, refresh };
 }
 
 export function useAdminCoupons(options: { enabled?: boolean } = {}) {

@@ -157,6 +157,17 @@ export interface Coupon {
   is_active: boolean;
 }
 
+/** Homepage "Exclusive Promo Code" section. Custom copy is optional — when
+ *  absent the UI derives the headline from the featured coupon. */
+export interface PromoSection {
+  is_active: boolean;
+  coupon?: Coupon;
+  title_en?: string;
+  title_bn?: string;
+  description_en?: string;
+  description_bn?: string;
+}
+
 export interface Banner {
   id: string;
   title_en: string;

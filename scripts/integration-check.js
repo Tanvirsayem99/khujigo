@@ -15,7 +15,7 @@ global.window = {
   },
 };
 
-process.env.NEXT_PUBLIC_API_URL = 'https://khujigo-server.onrender.com/api/v1';
+process.env.NEXT_PUBLIC_API_URL = 'https://khujigo-server.vercel.app/api/v1';
 
 const api = require('../.tmp-fe-build/lib/api/endpoints.js');
 const client = require('../.tmp-fe-build/lib/api/client.js');

@@ -11,12 +11,12 @@ Next.js 15 (App Router) + React 19 + Tailwind v4. All data comes from the **Khuj
 
 **Prerequisites:** Node.js, and the API running (see `../khujigo-api/README.md`).
 
-1. Start the API first (it listens on `https://khujigo-server.onrender.com/api/v1`).
+1. Start the API first (it listens on `https://khujigo-server.vercel.app/api/v1`).
 2. Install dependencies:
    `npm install --include=dev`
 3. Point the app at the API — `NEXT_PUBLIC_API_URL` in `.env.local` (already set for local dev):
    ```bash
-   NEXT_PUBLIC_API_URL="https://khujigo-server.onrender.com/api/v1"
+   NEXT_PUBLIC_API_URL="https://khujigo-server.vercel.app/api/v1"
    ```
 4. Run the app:
    `npm run dev`

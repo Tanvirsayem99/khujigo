@@ -1,7 +1,7 @@
 import type { ApiErrorBody, TokenSubject } from './types';
 
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? 'https://khujigo-server.onrender.com/api/v1';
+  process.env.NEXT_PUBLIC_API_URL ?? 'https://khujigo-server.vercel.app/api/v1';
 
 /**
  * Tokens are stored per subject, so being signed in as a customer and an admin

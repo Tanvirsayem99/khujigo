@@ -15,15 +15,13 @@ import {
   Package,
   MapPin,
   LogOut,
-  Clock,
-  CheckCircle2,
-  Truck,
   Phone,
   Mail,
   ShieldCheck,
   ChevronRight,
   ExternalLink,
 } from 'lucide-react';
+import OrderStatusBadge from '@/components/storefront/OrderStatusBadge';
 
 export default function AccountPage() {
   const router = useRouter();
@@ -119,39 +117,6 @@ export default function AccountPage() {
   };
 
   const currentDivision = BANGLADESH_DIVISIONS.find((d) => d.id === divisionValue);
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'DELIVERED':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-            <CheckCircle2 className="w-3 h-3" />
-            {t({ en: 'Delivered', bn: 'ডেলিভারড' })}
-          </span>
-        );
-      case 'SHIPPED':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            <Truck className="w-3 h-3" />
-            {t({ en: 'Shipped', bn: 'পথে আছে' })}
-          </span>
-        );
-      case 'CONFIRMED':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-            <CheckCircle2 className="w-3 h-3" />
-            {t({ en: 'Confirmed', bn: 'কনফার্মড' })}
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-neutral-100 text-neutral-800">
-            <Clock className="w-3 h-3" />
-            {t({ en: 'Pending', bn: 'পেন্ডিং' })}
-          </span>
-        );
-    }
-  };
 
   return (
     <main className="max-w-6xl mx-auto py-8 px-4 sm:px-6">
@@ -277,7 +242,12 @@ export default function AccountPage() {
                         <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-neutral-100 mb-4">
                           <div>
                             <span className="text-xs text-neutral-500">{t({ en: 'Order ID: ', bn: 'অর্ডার নং: ' })}</span>
-                            <span className="text-xs font-bold text-brand-navy">{order.id}</span>
+                            <Link
+                              href={`/account/orders/${order.id}`}
+                              className="text-xs font-bold text-brand-navy hover:text-brand-orange transition"
+                            >
+                              {order.id}
+                            </Link>
                             <span className="mx-2 text-neutral-300">•</span>
                             <span className="text-xs text-neutral-500">
                               {new Date(order.created_at).toLocaleDateString('bn-BD', {
@@ -288,7 +258,7 @@ export default function AccountPage() {
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
-                            {getStatusBadge(order.order_status)}
+                            <OrderStatusBadge status={order.order_status} />
                           </div>
                         </div>
 
@@ -321,15 +291,24 @@ export default function AccountPage() {
                           ))}
                         </div>
 
-                        <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-xs">
-                          <span className="text-neutral-600">
+                        <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3">
+                          <span className="text-xs text-neutral-600">
                             {t({ en: 'Payment Method: ', bn: 'পেমেন্ট মাধ্যম: ' })}
                             <strong className="text-brand-navy">{order.payment_method}</strong>
                           </span>
-                          <span className="text-sm font-bold text-brand-navy">
-                            {t({ en: 'Total: ', bn: 'সর্বমোট: ' })}
-                            <span className="text-brand-orange">{formatBDT(order.total_amount)}</span>
-                          </span>
+                          <div className="flex items-center gap-4">
+                            <span className="text-sm font-bold text-brand-navy">
+                              {t({ en: 'Total: ', bn: 'সর্বমোট: ' })}
+                              <span className="text-brand-orange">{formatBDT(order.total_amount)}</span>
+                            </span>
+                            <Link
+                              href={`/account/orders/${order.id}`}
+                              className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-brand-orange hover:bg-brand-orange-hover text-white text-xs font-semibold transition"
+                            >
+                              {t({ en: 'Track Order', bn: 'অর্ডার ট্র্যাক' })}
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     ))}

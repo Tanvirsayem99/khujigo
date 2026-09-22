@@ -25,6 +25,40 @@ export function ProductGridSkeleton({ count = 4 }: { count?: number }) {
   );
 }
 
+/** Placeholder matching the HeroBanner's footprint so the hero never collapses. */
+export function BannerSkeleton() {
+  return (
+    <div
+      aria-hidden="true"
+      className="hidden md:block relative w-full overflow-hidden rounded-3xl shadow-xl bg-gray-100 animate-pulse"
+    >
+      <div className="min-h-[460px] lg:min-h-[480px] flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5">
+            <div className="h-7 w-32 rounded-full bg-gray-200" />
+            <div className="space-y-3">
+              <div className="h-9 sm:h-12 w-4/5 rounded-2xl bg-gray-200" />
+              <div className="h-9 sm:h-12 w-3/5 rounded-2xl bg-gray-200" />
+            </div>
+            <div className="h-4 w-2/3 rounded-full bg-gray-200" />
+            <div className="flex flex-wrap gap-3 pt-1">
+              <div className="h-7 w-40 rounded-lg bg-gray-200" />
+              <div className="h-7 w-36 rounded-lg bg-gray-200" />
+            </div>
+            <div className="flex flex-wrap gap-3 pt-2">
+              <div className="h-12 w-40 rounded-xl bg-gray-200" />
+              <div className="h-12 w-28 rounded-xl bg-gray-200" />
+            </div>
+          </div>
+          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+            <div className="w-80 h-80 lg:w-96 lg:h-96 rounded-3xl bg-gray-200" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Generic stacked-row placeholder for lists and tables. */
 export function RowsSkeleton({ rows = 5 }: { rows?: number }) {
   return (
