@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState, Suspense } from 'react';
+import React, { useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
   SlidersHorizontal,
@@ -25,6 +25,7 @@ import { useCategories, useProducts } from '@/lib/hooks/api';
 import type { ProductQuery } from '@/lib/api/endpoints';
 import type { ProductSort } from '@/lib/api/types';
 import { formatPriceBD, toBanglaNumber } from '@/lib/bangladesh-data';
+import { trackSearch } from '@/lib/analytics/facebook-pixel';
 
 const PRICE_MAX = 10000;
 const PAGE_SIZE = 12;
@@ -110,6 +111,20 @@ function ShopFilters({ paramsKey }: { paramsKey: string }) {
   };
 
   const { products, total, totalPages, isLoading, error, refresh } = useProducts(query);
+
+  // Debounced and de-duplicated so typing "shoe" reports one Search, not four.
+  const lastTrackedSearch = useRef('');
+
+  useEffect(() => {
+    const term = searchQuery.trim();
+    if (!term) return;
+    const timer = setTimeout(() => {
+      if (lastTrackedSearch.current === term) return;
+      lastTrackedSearch.current = term;
+      trackSearch(term);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const catalogSize = categories.reduce(
     (sum, category) => sum + (category.product_count ?? 0),

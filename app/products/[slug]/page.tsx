@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -33,6 +33,7 @@ import {
 } from '@/lib/hooks/api';
 import { formatPriceBD, toBanglaNumber } from '@/lib/bangladesh-data';
 import { CONTACT_INFO } from '@/lib/constants';
+import { trackViewContent } from '@/lib/analytics/facebook-pixel';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -59,6 +60,16 @@ export default function ProductDetailPage() {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  // Navigating between detail pages reuses this component, so the id guard is
+  // what keeps revalidations from re-reporting the same product.
+  const trackedProductId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!product || trackedProductId.current === product.id) return;
+    trackedProductId.current = product.id;
+    trackViewContent(product);
+  }, [product]);
 
   if (isLoading && !product) {
     return (

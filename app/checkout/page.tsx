@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -25,6 +25,7 @@ import type { CouponRejectionReason } from '@/lib/api/types';
 import { couponErrorMessage } from '@/lib/coupon-messages';
 import { revalidateCatalog, useDeliverySettings } from '@/lib/hooks/api';
 import { BANGLADESH_DIVISIONS, formatPriceBD, toBanglaNumber } from '@/lib/bangladesh-data';
+import { trackInitiateCheckout, trackPurchase } from '@/lib/analytics/facebook-pixel';
 import { PaymentMethod } from '@/types';
 
 export default function CheckoutPage() {
@@ -66,6 +67,15 @@ export default function CheckoutPage() {
       : deliverySettings?.outsideDhaka ?? 120;
   const discountAmount = appliedCoupon ? appliedCoupon.discount : 0;
   const grandTotal = Math.max(0, cartTotal - discountAmount + deliveryCharge);
+
+  // Once per visit to the checkout step, not per render.
+  const checkoutTracked = useRef(false);
+
+  useEffect(() => {
+    if (checkoutTracked.current || cart.length === 0) return;
+    checkoutTracked.current = true;
+    trackInitiateCheckout(cart);
+  }, [cart]);
 
   // Districts for current division
   const currentDivisionObj = BANGLADESH_DIVISIONS.find((d) => d.id === division);
@@ -183,6 +193,7 @@ export default function CheckoutPage() {
         })),
       });
 
+      trackPurchase(order);
       clearCart();
       revalidateCatalog();
 

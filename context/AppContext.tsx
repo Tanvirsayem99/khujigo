@@ -10,6 +10,7 @@ import React, {
 } from 'react';
 import { CartItem, Product, WishlistItem, Language } from '@/types';
 import { translations } from '@/lib/i18n';
+import { trackAddToCart, trackAddToWishlist } from '@/lib/analytics/facebook-pixel';
 
 type TranslationDict = typeof translations['bn'];
 export type TranslationHelper = ((options: { en: string; bn: string }) => string) & TranslationDict;
@@ -135,6 +136,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return newCart;
       });
 
+      trackAddToCart(product, quantity);
+
       showToast(language === 'bn' ? 'পণ্য কার্টে যোগ করা হয়েছে!' : 'Product added to cart!');
     },
     [language, showToast],
@@ -189,6 +192,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Wishlist operations
   const toggleWishlist = useCallback(
     (product: Product) => {
+      const isAdding = !wishlist.some((item) => item.product.id === product.id);
       setWishlist((prev) => {
         const exists = prev.some((item) => item.product.id === product.id);
         let updated: WishlistItem[];
@@ -213,8 +217,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
         return updated;
       });
+
+      if (isAdding) {
+        trackAddToWishlist(product);
+      }
     },
-    [language, showToast],
+    [language, showToast, wishlist],
   );
 
   const isInWishlist = useCallback(
