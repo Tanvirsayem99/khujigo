@@ -2,6 +2,17 @@ import type {Metadata, Viewport} from 'next';
 import Script from 'next/script';
 import './globals.css'; // Global styles
 import StorefrontWrapper from '@/components/storefront/StorefrontWrapper';
+import {
+  SITE_DEFAULT_DESCRIPTION,
+  SITE_DEFAULT_TITLE,
+  SITE_KEYWORDS,
+  SITE_LOCALE,
+  SITE_NAME,
+  SITE_URL,
+  jsonLd,
+  organizationJsonLd,
+  websiteJsonLd,
+} from '@/lib/seo';
 
 // `viewportFit: 'cover'` is required for env(safe-area-inset-*) to be non-zero on iOS.
 export const viewport: Viewport = {
@@ -12,19 +23,47 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
-  title: 'KhujiGo - খুঁজে নিন ট্রেন্ডিং সবকিছু!',
-  description: 'KhujiGo is a modern Bangladeshi e-commerce platform where customers can discover trending, useful, unique, and interesting products and order them online.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_DEFAULT_TITLE,
+    // Pages export a bare title and get "… | KhujiGo" appended.
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: SITE_KEYWORDS,
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: 'shopping',
   openGraph: {
-    title: 'KhujiGo - খুঁজে নিন ট্রেন্ডিং সবকিছু!',
-    description: 'KhujiGo is a modern Bangladeshi e-commerce platform where customers can discover trending, useful, unique, and interesting products and order them online.',
     type: 'website',
+    siteName: SITE_NAME,
+    locale: SITE_LOCALE,
+    url: SITE_URL,
+    title: SITE_DEFAULT_TITLE,
+    description: SITE_DEFAULT_DESCRIPTION,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KhujiGo - খুঁজে নিন ট্রেন্ডিং সবকিছু!',
-    description: 'KhujiGo is a modern Bangladeshi e-commerce platform where customers can discover trending, useful, unique, and interesting products and order them online.',
+    title: SITE_DEFAULT_TITLE,
+    description: SITE_DEFAULT_DESCRIPTION,
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+  // Only emitted once a token is configured in the deploy environment.
+  ...(process.env.GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+    : {}),
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
@@ -57,6 +96,15 @@ fbq('track', 'PageView');`}
             src="https://www.facebook.com/tr?id=1471809464847775&ev=PageView&noscript=1"
           />
         </noscript>
+        {/* Site-wide structured data: who we are, and the site-level search action. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(organizationJsonLd()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(websiteJsonLd()) }}
+        />
         <StorefrontWrapper>{children}</StorefrontWrapper>
       </body>
     </html>
