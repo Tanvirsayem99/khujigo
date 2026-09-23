@@ -35,7 +35,7 @@ export default function AboutUsPage() {
       icon: ShieldCheck,
       title: isBn ? '১০০% অরিজিনাল' : '100% Original',
       body: isBn
-        ? 'সরাসরি অথেনটিক ব্র্যান্ড ও সোর্স থেকে সংগৃহীত পণ্য।'
+        ? 'সরাসরি অথেনটিক সোর্স থেকে সংগৃহীত পণ্য।'
         : 'Every product sourced from authentic brands and verified suppliers.',
     },
     {
