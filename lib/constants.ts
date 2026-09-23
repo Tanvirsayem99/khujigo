@@ -15,10 +15,10 @@ export const CONTACT_INFO = {
   whatsappUrl: 'https://wa.me/8801860447346',
   email: 'khujigo@gmail.com',
   facebookUrl: 'https://www.facebook.com/profile.php?id=61594389542669',
-  address_bn: 'বাড়ি #১২, রোড #৪, ধানমন্ডি, ঢাকা - ১২০৫, বাংলাদেশ',
-  address_en: 'House #12, Road #4, Dhanmondi, Dhaka - 1205, Bangladesh',
-  workingHours_bn: 'সকাল ৯:০০ - রাত ১০:০০ (প্রতিদিন)',
-  workingHours_en: '9:00 AM - 10:00 PM (Everyday)',
+  address_bn: 'বাড়ি #১৬০/৩, টি ব্লক, মধ্যম বাড্ডা, ঢাকা - ১২১২, বাংলাদেশ',
+  address_en: 'House 160/3, T block, Middle badda, Dhaka - 1212, Bangladesh',
+  workingHours_bn: 'সকাল ৯:০০ - রাত ১২:০০ (প্রতিদিন)',
+  workingHours_en: '9:00 AM - 12:00 AM (Everyday)',
 };
 
 // Only these customer emails see the admin-panel shortcuts in the storefront.

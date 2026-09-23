@@ -44,7 +44,7 @@ export default function TrustBadges() {
 
 
   return (
-    <div className="w-full bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-xs">
+    <div className="hidden md:block w-full bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-xs">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {FEATURES.map((f, idx) => {
           const Icon = f.icon;

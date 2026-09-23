@@ -126,24 +126,6 @@ export default function Footer() {
                 <span className="text-xs font-bold">f</span>
               </a>
               <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-[#E4405F] text-gray-300 hover:text-white flex items-center justify-center transition"
-                title="Instagram"
-              >
-                <span className="text-xs font-bold">in</span>
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-[#FF0000] text-gray-300 hover:text-white flex items-center justify-center transition"
-                title="YouTube"
-              >
-                <span className="text-xs font-bold">yt</span>
-              </a>
-              <a
                 href={CONTACT_INFO.whatsappUrl}
                 target="_blank"
                 rel="noreferrer"
@@ -188,7 +170,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/my-account" className="hover:text-[#FF6A00] transition">
+                <Link href="/account" className="hover:text-[#FF6A00] transition">
                   {t.myAccount}
                 </Link>
               </li>
@@ -207,7 +189,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/my-orders" className="hover:text-[#FF6A00] transition">
+                <Link href="/account" className="hover:text-[#FF6A00] transition">
                   {language === 'bn' ? 'অর্ডার ট্র্যাক করুন' : 'Track Order'}
                 </Link>
               </li>
@@ -263,15 +245,6 @@ export default function Footer() {
               </span>
             </div>
 
-            <div className="pt-3">
-              <Link
-                href="/admin"
-                className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-[#FFC400] transition"
-              >
-                <span>{t.adminDashboard}</span>
-                <ExternalLink className="w-3 h-3" />
-              </Link>
-            </div>
           </div>
         </div>
       </div>
