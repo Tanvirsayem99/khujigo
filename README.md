@@ -2,6 +2,7 @@
 <img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
+khuji go, khujigo.shop
 # KhujiGo — storefront & admin dashboard
 
 Next.js 15 (App Router) + React 19 + Tailwind v4. All data comes from the **KhujiGo API**
