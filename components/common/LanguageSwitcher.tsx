@@ -22,7 +22,7 @@ export default function LanguageSwitcher({ variant = 'full', className = '' }: L
         onClick={() => setLanguage('bn')}
         className={`px-2.5 py-1 rounded-full transition-all duration-150 ${
           language === 'bn'
-            ? 'bg-[#FF6A00] text-white shadow-xs font-bold'
+            ? 'bg-brand-orange-deep text-white shadow-xs font-bold'
             : 'text-gray-700 hover:text-[#FF6A00]'
         }`}
       >
@@ -34,7 +34,7 @@ export default function LanguageSwitcher({ variant = 'full', className = '' }: L
         onClick={() => setLanguage('en')}
         className={`px-2.5 py-1 rounded-full transition-all duration-150 ${
           language === 'en'
-            ? 'bg-[#FF6A00] text-white shadow-xs font-bold'
+            ? 'bg-brand-orange-deep text-white shadow-xs font-bold'
             : 'text-gray-700 hover:text-[#FF6A00]'
         }`}
       >

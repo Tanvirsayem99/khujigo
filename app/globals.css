@@ -4,6 +4,10 @@
 @theme {
   --color-brand-orange: #FF6A00;
   --color-brand-orange-bright: #FF8A00;
+  /* WCAG AA shade of the brand orange. White on --color-brand-orange is only
+     2.87:1, this is 5.18:1 — used for text and for fills that carry white text.
+     The lighter --color-brand-orange stays for backgrounds, icons, decoration. */
+  --color-brand-orange-deep: #C2410C;
   --color-brand-yellow: #FFC400;
   --color-brand-navy: #07111F;
   --color-brand-navy-light: #132238;

@@ -23,6 +23,14 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Serve the smaller modern formats (Next only ships `image/webp` by default).
+    // AVIF is a little slower to encode the first time and is then cached.
+    formats: ['image/avif', 'image/webp'],
+    // Next's default is 60 seconds, which made every optimised product photo
+    // look "uncacheable" to Lighthouse. Supplier/CDN URLs are versioned
+    // (e.g. Cloudinary's /v<timestamp>/), so the bytes behind a given
+    // /_next/image URL do not change and a year is safe.
+    minimumCacheTTL: 31536000,
   },
   output: 'standalone',
   experimental: {

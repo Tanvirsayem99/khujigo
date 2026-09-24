@@ -130,7 +130,7 @@ export default function Navbar() {
               <button
                 type="submit"
                 id="navbar-search-submit-btn"
-                className="absolute right-1.5 px-4 py-1.5 bg-[#FF6A00] text-white text-xs font-bold rounded-full hover:bg-[#FF8A00] transition-colors shadow-xs shadow-orange-500/20"
+                className="absolute right-1.5 px-4 py-1.5 bg-brand-orange-deep text-white text-xs font-bold rounded-full hover:bg-orange-800 transition-colors shadow-xs shadow-orange-500/20"
               >
                 {t.searchBtn}
               </button>
@@ -163,13 +163,13 @@ export default function Navbar() {
             <button
               id="navbar-cart-trigger-btn"
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 sm:px-3.5 sm:py-2 rounded-full bg-[#FF6A00]/10 hover:bg-[#FF6A00]/20 text-[#FF6A00] transition flex items-center gap-2 group"
+              className="relative p-2.5 sm:px-3.5 sm:py-2 rounded-full bg-[#FF6A00]/10 hover:bg-[#FF6A00]/20 text-brand-orange-deep transition flex items-center gap-2 group"
               title={t.cart}
             >
               <div className="relative">
                 <ShoppingBag className="w-5 h-5 group-hover:scale-105 transition-transform" />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-[#FF6A00] text-white text-[10px] font-extrabold flex items-center justify-center border-2 border-white shadow-xs">
+                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-orange-deep text-white text-[10px] font-extrabold flex items-center justify-center border-2 border-white shadow-xs">
                     {cartCount}
                   </span>
                 )}
@@ -192,7 +192,7 @@ export default function Navbar() {
                 aria-expanded={accountMenuOpen}
               >
                 {isCustomerLoggedIn && customer ? (
-                  <div className="w-7 h-7 rounded-full bg-brand-orange text-white text-xs font-bold flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full bg-brand-orange-deep text-white text-xs font-bold flex items-center justify-center">
                     {customer.name[0]?.toUpperCase() || 'U'}
                   </div>
                 ) : (
@@ -246,7 +246,7 @@ export default function Navbar() {
                       <Link
                         href="/login"
                         onClick={() => setAccountMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 hover:bg-orange-50 text-brand-orange font-bold"
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-orange-50 text-brand-orange-deep font-bold"
                       >
                         <LogIn className="w-4 h-4" />
                         <span>{t.login}</span>
@@ -299,7 +299,7 @@ export default function Navbar() {
             <Search className="w-3.5 h-3.5 text-[#FF6A00] absolute left-3 pointer-events-none" />
             <button
               type="submit"
-              className="absolute right-1 px-3 py-1 bg-[#FF6A00] text-white text-[11px] font-bold rounded-full"
+              className="absolute right-1 px-3 py-1 bg-brand-orange-deep text-white text-[11px] font-bold rounded-full"
             >
               {t.searchBtn}
             </button>
@@ -319,7 +319,7 @@ export default function Navbar() {
                   link.isDeal
                     ? 'bg-[#FFC400]/20 text-[#07111F] font-bold hover:bg-[#FFC400]/40'
                     : link.badge === 'HOT'
-                    ? 'text-[#FF6A00] hover:bg-orange-100 font-bold'
+                    ? 'text-brand-orange-deep hover:bg-orange-100 font-bold'
                     : 'text-[#07111F] hover:text-[#FF6A00] hover:bg-orange-100/50'
                 }`}
               >
@@ -327,7 +327,7 @@ export default function Navbar() {
                 {link.isDeal && <Tag className="w-3.5 h-3.5 text-[#FF6A00]" />}
                 <span>{language === 'bn' ? link.label_bn : link.label_en}</span>
                 {link.badge && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-[#FF6A00] text-white text-[9px] font-extrabold tracking-wider">
+                  <span className="px-1.5 py-0.2 rounded-full bg-brand-orange-deep text-white text-[9px] font-extrabold tracking-wider">
                     {link.badge}
                   </span>
                 )}
@@ -336,7 +336,7 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-4 py-2 text-xs text-gray-600">
-            <span className="flex items-center gap-1 text-[#FF6A00] font-bold">
+            <span className="flex items-center gap-1 text-brand-orange-deep font-bold">
               <Sparkles className="w-3.5 h-3.5" />
               <span>{freeDeliveryText}</span>
             </span>
@@ -378,7 +378,7 @@ export default function Navbar() {
                     {language === 'bn' ? link.label_bn : link.label_en}
                   </span>
                   {link.badge && (
-                    <span className="px-2 py-0.5 rounded-full bg-[#FF6A00] text-white text-[10px] font-bold">
+                    <span className="px-2 py-0.5 rounded-full bg-brand-orange-deep text-white text-[10px] font-bold">
                       {link.badge}
                     </span>
                   )}
@@ -417,7 +417,7 @@ export default function Navbar() {
                   <Link
                     href="/login"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="text-center py-2 px-3 rounded-xl text-xs font-bold text-white bg-brand-orange"
+                    className="text-center py-2 px-3 rounded-xl text-xs font-bold text-white bg-brand-orange-deep"
                   >
                     {t.login}
                   </Link>
@@ -439,7 +439,7 @@ export default function Navbar() {
                 <Heart className="w-4 h-4 text-[#FF6A00]" />
                 <span>{t.wishlist}</span>
                 {wishlist.length > 0 && (
-                  <span className="ml-auto min-w-[20px] h-5 px-1 rounded-full bg-[#FF6A00] text-white text-[10px] font-bold flex items-center justify-center">
+                  <span className="ml-auto min-w-[20px] h-5 px-1 rounded-full bg-brand-orange-deep text-white text-[10px] font-bold flex items-center justify-center">
                     {wishlist.length}
                   </span>
                 )}
@@ -448,7 +448,7 @@ export default function Navbar() {
                 <Link
                   href={isAdminLoggedIn ? '/admin' : '/admin-login'}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2 rounded-xl text-xs font-bold text-[#FF6A00] bg-orange-50"
+                  className="block px-3 py-2 rounded-xl text-xs font-bold text-brand-orange-deep bg-orange-50"
                 >
                   {t.adminDashboard} {isAdminLoggedIn ? `(${adminUser?.role})` : ''}
                 </Link>

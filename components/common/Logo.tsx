@@ -22,7 +22,7 @@ export default function Logo({ variant = 'full', className = '' }: LogoProps) {
           </span>
         </div>
         <span className="text-xl font-black tracking-tight text-[#07111F]">
-          K<span className="text-[#FF6A00]">G</span>
+          K<span className="text-brand-orange-deep">G</span>
         </span>
       </Link>
     );
@@ -55,9 +55,13 @@ export default function Logo({ variant = 'full', className = '' }: LogoProps) {
       <div className="flex flex-col">
         <div className="flex items-center gap-1.5 leading-none">
           <span className={`text-2xl font-black tracking-tight ${isFooter ? 'text-white' : 'text-[#07111F]'}`}>
-            Khuji<span className="text-[#FF6A00]">Go</span>
+            Khuji<span className={isFooter ? 'text-brand-orange' : 'text-brand-orange-deep'}>Go</span>
           </span>
-          <span className="px-1.5 py-0.5 text-[10px] font-extrabold uppercase rounded bg-[#FFC400]/20 text-[#FF6A00] border border-[#FFC400]/40">
+          <span
+            className={`px-1.5 py-0.5 text-[10px] font-extrabold uppercase rounded bg-[#FFC400]/20 border border-[#FFC400]/40 ${
+              isFooter ? 'text-brand-orange' : 'text-brand-orange-deep'
+            }`}
+          >
             BD
           </span>
         </div>

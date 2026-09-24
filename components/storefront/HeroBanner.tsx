@@ -94,7 +94,7 @@ export default function HeroBanner() {
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Link
                 href={active.button_url}
-                className="px-6 sm:px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-orange to-orange-500 hover:from-[#e55f00] hover:to-orange-600 text-white font-extrabold text-sm sm:text-base shadow-lg shadow-orange-500/30 transition-all hover:scale-102 flex items-center gap-2"
+                className="px-6 sm:px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-orange-deep to-orange-700 hover:from-orange-800 hover:to-orange-800 text-white font-extrabold text-sm sm:text-base shadow-lg shadow-orange-500/30 transition-all hover:scale-102 flex items-center gap-2"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span>{language === 'bn' ? active.button_text_bn : active.button_text_en}</span>
@@ -116,7 +116,11 @@ export default function HeroBanner() {
                   src={active.image_url || FALLBACK_IMAGE}
                   alt={title}
                   fill
-                  sizes="(max-width: 1024px) 320px, 384px"
+                  // The hero is `hidden` below md, so on phones the slot it
+                  // occupies is zero. Declaring that here keeps the `priority`
+                  // preload from pulling a full-size banner — which would
+                  // compete with the real mobile LCP image — on slow networks.
+                  sizes="(max-width: 767px) 1px, (max-width: 1024px) 320px, 384px"
                   className="object-cover hover:scale-105 transition-transform duration-700"
                   priority
                   referrerPolicy="no-referrer"
@@ -129,8 +133,8 @@ export default function HeroBanner() {
                   <Zap className="w-5 h-5 fill-current" />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase font-bold text-gray-400">{language === 'bn' ? 'বিশেষ মূল্য' : 'Special Offer'}</p>
-                  <p className="text-sm font-black text-brand-orange">৳৪৯৯ থেকে শুরু</p>
+                  <p className="text-[10px] uppercase font-bold text-gray-500">{language === 'bn' ? 'বিশেষ মূল্য' : 'Special Offer'}</p>
+                  <p className="text-sm font-black text-brand-orange-deep">৳৪৯৯ থেকে শুরু</p>
                 </div>
               </div>
             </div>

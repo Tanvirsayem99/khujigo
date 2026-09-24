@@ -12,8 +12,6 @@ import {
   Truck,
   RotateCcw,
   Headphones,
-  CheckCircle2,
-  ExternalLink,
 } from 'lucide-react';
 import Logo from '@/components/common/Logo';
 import { CONTACT_INFO } from '@/lib/constants';
@@ -255,7 +253,7 @@ export default function Footer() {
           © {new Date().getFullYear()} <span className="text-white font-bold">KhujiGo</span>. {t.allRightsReserved}
           <span className="text-[#FF6A00] font-semibold ml-1.5">খুঁজে নিন ট্রেন্ডিং সবকিছু!</span>
         </div>
-        <div className="flex items-center gap-4 text-gray-500 text-[11px]">
+        <div className="flex items-center gap-4 text-gray-400 text-[11px]">
           <span>Made for Bangladesh 🇧🇩</span>
           <span>•</span>
           <Link href="/privacy-policy" className="hover:text-gray-300">Privacy</Link>

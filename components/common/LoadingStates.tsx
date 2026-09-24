@@ -4,20 +4,44 @@ import React from 'react';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
-/** Placeholder cards matching ProductCard's footprint. */
-export function ProductGridSkeleton({ count = 4 }: { count?: number }) {
+const PRODUCT_GRID_COLUMNS = 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+
+/**
+ * Placeholder cards matching ProductCard's footprint block for block (square
+ * thumbnail, two-line title, price row, two buttons) so swapping in the real
+ * cards cannot shift the layout.
+ */
+export function ProductGridSkeleton({
+  count = 4,
+  columns = PRODUCT_GRID_COLUMNS,
+}: {
+  count?: number;
+  columns?: string;
+}) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+    <div className={`grid ${columns} gap-3 sm:gap-5`}>
       {Array.from({ length: count }).map((_, index) => (
         <div
           key={index}
           className="bg-white rounded-2xl border border-gray-100 overflow-hidden animate-pulse"
         >
           <div className="aspect-square bg-gray-100" />
-          <div className="p-3 space-y-2">
-            <div className="h-3 bg-gray-100 rounded-full w-4/5" />
-            <div className="h-3 bg-gray-100 rounded-full w-3/5" />
-            <div className="h-4 bg-gray-100 rounded-full w-2/5 mt-3" />
+          <div className="p-3 sm:p-4">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <div className="h-3 w-16 bg-gray-100 rounded-full" />
+              <div className="h-3 w-12 bg-gray-100 rounded-full" />
+            </div>
+            <div className="space-y-1.5 min-h-[2.5rem]">
+              <div className="h-3.5 bg-gray-100 rounded-full w-full" />
+              <div className="h-3.5 bg-gray-100 rounded-full w-4/5" />
+            </div>
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="h-5 w-24 bg-gray-100 rounded-full mb-3" />
+              <div className="grid grid-cols-2 gap-2">
+                <div className="h-10 bg-gray-100 rounded-xl" />
+                <div className="h-10 bg-gray-100 rounded-xl" />
+              </div>
+            </div>
           </div>
         </div>
       ))}

@@ -70,8 +70,11 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="bn" suppressHydrationWarning>
       <head>
-        {/* Meta Pixel Code */}
-        <Script id="facebook-pixel" strategy="afterInteractive">
+        {/* Meta Pixel Code — `lazyOnload` keeps fbevents.js off the critical
+            path so it cannot contend with the LCP image on slow connections.
+            Trade-off: a bounce that happens before `window.load` may not be
+            reported. Switch back to `afterInteractive` if attribution drops. */}
+        <Script id="facebook-pixel" strategy="lazyOnload">
           {`!function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};

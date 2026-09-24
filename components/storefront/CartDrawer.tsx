@@ -97,7 +97,7 @@ export default function CartDrawer() {
                           ৳{item.price.toLocaleString()}
                         </span>
                         {item.compare_price && (
-                          <span className="text-xs text-gray-400 line-through">
+                          <span className="text-xs text-gray-500 line-through">
                             ৳{item.compare_price.toLocaleString()}
                           </span>
                         )}

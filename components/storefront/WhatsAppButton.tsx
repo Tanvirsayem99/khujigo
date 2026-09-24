@@ -27,7 +27,7 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       id="floating-whatsapp-btn"
-      className="fixed bottom-[calc(5.125rem+env(safe-area-inset-bottom))] md:bottom-6 right-4 md:right-6 z-40 flex items-center gap-2 px-3.5 py-2.5 bg-[#25D366] hover:bg-[#20BD5A] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 group"
+      className="fixed bottom-[calc(5.125rem+env(safe-area-inset-bottom))] md:bottom-6 right-4 md:right-6 z-40 flex items-center gap-2 px-3.5 py-2.5 bg-[#107C6B] hover:bg-[#0C6656] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 group"
       title="Chat on WhatsApp"
     >
       <div className="relative">

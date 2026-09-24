@@ -75,11 +75,11 @@ export default function CustomerReviewsSection() {
                   <span className="text-xs font-bold text-brand-navy">{rev.customer_name}</span>
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 fill-emerald-100" />
                 </div>
-                <p className="text-[10px] text-brand-orange font-medium truncate max-w-[170px]">
+                <p className="text-[10px] text-brand-orange-deep font-medium truncate max-w-[170px]">
                   {rev.product_name}
                 </p>
               </div>
-              <span className="text-[10px] text-gray-400 font-medium">ভেরিফায়েড</span>
+              <span className="text-[10px] text-gray-500 font-medium">ভেরিফায়েড</span>
             </div>
           </div>
         ))}

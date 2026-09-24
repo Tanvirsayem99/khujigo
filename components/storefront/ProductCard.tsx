@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Heart, ShoppingBag, Zap, Star, Flame, CheckCircle2 } from 'lucide-react';
+import { Heart, ShoppingBag, Zap, Star, Flame } from 'lucide-react';
 import { Product } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { formatPriceBD, toBanglaNumber } from '@/lib/bangladesh-data';
@@ -67,12 +67,12 @@ function ProductCard({ product, priority = false }: ProductCardProps) {
         {/* Badges Overlay */}
         <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10">
           {discountPercent > 0 && (
-            <span className="px-2 py-0.5 rounded-md bg-gradient-to-r from-red-600 to-rose-500 text-white text-[11px] font-black tracking-tight shadow-sm">
+            <span className="px-2 py-0.5 rounded-md bg-gradient-to-r from-red-700 to-rose-600 text-white text-[11px] font-black tracking-tight shadow-sm">
               {language === 'bn' ? `${toBanglaNumber(discountPercent)}% ছাড়` : `${discountPercent}% OFF`}
             </span>
           )}
           {product.is_trending && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500 text-white text-[10px] font-bold shadow-sm">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-700 text-white text-[10px] font-bold shadow-sm">
               <Flame className="w-3 h-3 fill-current text-amber-200" />
               <span>{language === 'bn' ? 'ট্রেন্ডিং' : 'Hot'}</span>
             </span>
@@ -106,13 +106,13 @@ function ProductCard({ product, priority = false }: ProductCardProps) {
         <div>
           {/* Category & Rating */}
           <div className="flex items-center justify-between gap-2 text-xs text-gray-500 mb-1.5">
-            <span className="font-medium text-brand-orange uppercase tracking-wider text-[10px]">
+            <span className="font-medium text-brand-orange-deep uppercase tracking-wider text-[10px]">
               {product.brand || 'KhujiGo'}
             </span>
-            <div className="flex items-center gap-1 text-[11px] text-amber-600 font-semibold">
+            <div className="flex items-center gap-1 text-[11px] text-amber-700 font-semibold">
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
               <span>{product.rating.toFixed(1)}</span>
-              <span className="text-gray-400 text-[10px]">({product.reviews_count})</span>
+              <span className="text-gray-500 text-[10px]">({product.reviews_count})</span>
             </div>
           </div>
 
@@ -131,7 +131,7 @@ function ProductCard({ product, priority = false }: ProductCardProps) {
               ৳{formattedPrice}
             </span>
             {formattedComparePrice && (
-              <span className="text-xs text-gray-400 line-through">
+              <span className="text-xs text-gray-500 line-through">
                 ৳{formattedComparePrice}
               </span>
             )}
@@ -142,7 +142,7 @@ function ProductCard({ product, priority = false }: ProductCardProps) {
             <button
               id={`add-cart-btn-${product.id}`}
               onClick={handleAddToCart}
-              className="w-full py-2.5 px-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-brand-orange text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1 border border-orange-200/60 active:scale-95"
+              className="w-full py-2.5 px-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-brand-orange-deep text-[11px] sm:text-xs font-bold transition flex items-center justify-center gap-1 border border-orange-200/60 active:scale-95"
               title={language === 'bn' ? 'কার্টে যোগ করুন' : 'Add to Cart'}
             >
               <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
@@ -151,7 +151,7 @@ function ProductCard({ product, priority = false }: ProductCardProps) {
             <button
               id={`buy-now-btn-${product.id}`}
               onClick={handleBuyNow}
-              className="w-full py-2.5 px-1.5 rounded-xl bg-gradient-to-r from-brand-orange to-orange-500 hover:from-[#e55f00] hover:to-orange-600 text-white text-[11px] sm:text-xs font-bold transition shadow-sm shadow-orange-500/25 flex items-center justify-center gap-1 active:scale-95"
+              className="w-full py-2.5 px-1.5 rounded-xl bg-gradient-to-r from-brand-orange-deep to-orange-700 hover:from-orange-800 hover:to-orange-800 text-white text-[11px] sm:text-xs font-bold transition shadow-sm shadow-orange-500/25 flex items-center justify-center gap-1 active:scale-95"
               title={language === 'bn' ? 'সরাসরি অর্ডার করুন' : 'Order Now'}
             >
               <Zap className="w-3.5 h-3.5 fill-current shrink-0" />

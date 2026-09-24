@@ -61,7 +61,7 @@ export default function MobileBottomNav() {
                     </span>
                   ) : null}
                 </div>
-                <span className="text-[10px] font-bold text-[#FF6A00] mt-0.5">
+                <span className="text-[10px] font-bold text-brand-orange-deep mt-0.5">
                   {language === 'bn' ? item.label_bn : item.label_en}
                 </span>
               </button>
@@ -73,18 +73,18 @@ export default function MobileBottomNav() {
               key={idx}
               href={item.href!}
               className={`flex flex-col items-center justify-center relative transition-colors ${
-                isActive ? 'text-[#FF6A00]' : 'text-gray-500 hover:text-gray-900'
+                isActive ? 'text-brand-orange-deep' : 'text-gray-500 hover:text-gray-900'
               }`}
             >
               <div className="relative">
                 <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
                 {item.count && item.count > 0 ? (
-                  <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-0.5 rounded-full bg-[#FF6A00] text-white text-[9px] font-bold flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-0.5 rounded-full bg-brand-orange-deep text-white text-[9px] font-bold flex items-center justify-center">
                     {item.count}
                   </span>
                 ) : null}
               </div>
-              <span className={`text-[10px] mt-1 font-medium ${isActive ? 'font-bold text-[#FF6A00]' : 'text-gray-600'}`}>
+              <span className={`text-[10px] mt-1 font-medium ${isActive ? 'font-bold text-brand-orange-deep' : 'text-gray-600'}`}>
                 {language === 'bn' ? item.label_bn : item.label_en}
               </span>
             </Link>

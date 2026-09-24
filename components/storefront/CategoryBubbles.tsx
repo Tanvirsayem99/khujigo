@@ -22,12 +22,13 @@ export default function CategoryBubbles() {
   if (isLoading) {
     return (
       <div className="w-full">
-        <div className="h-6 w-48 bg-gray-100 rounded-full animate-pulse mb-4" />
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 sm:gap-4">
+        <div className="h-7 w-48 bg-gray-100 rounded-full animate-pulse" />
+        <div className="h-4 w-64 max-w-full bg-gray-100 rounded-full animate-pulse mt-2" />
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3 sm:gap-4 mt-4 sm:mt-6">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className="h-28 rounded-2xl bg-white border border-gray-100 animate-pulse"
+              className="h-28 sm:h-32 rounded-2xl bg-white border border-gray-100 animate-pulse"
             />
           ))}
         </div>
@@ -50,7 +51,7 @@ export default function CategoryBubbles() {
         </div>
         <Link
           href="/categories"
-          className="text-xs sm:text-sm font-bold text-brand-orange hover:text-[#e55f00] transition flex items-center gap-1"
+          className="text-xs sm:text-sm font-bold text-brand-orange-deep hover:text-[#9a3412] transition flex items-center gap-1"
         >
           <span>{language === 'bn' ? 'সব দেখুন' : 'View All'}</span>
           <span>→</span>
@@ -73,7 +74,7 @@ export default function CategoryBubbles() {
               <span className="text-xs sm:text-sm font-bold text-gray-800 group-hover:text-brand-orange line-clamp-1 transition-colors">
                 {language === 'bn' ? cat.name_bn : cat.name_en}
               </span>
-              <span className="text-[10px] text-gray-400 font-medium mt-0.5">
+              <span className="text-[10px] text-gray-500 font-medium mt-0.5">
                 {language === 'bn'
                   ? `${cat.product_count ?? 0}+ আইটেম`
                   : `${cat.product_count ?? 0}+ items`}
