@@ -149,7 +149,7 @@ export default function Footer() {
               <li>
                 <Link href="/shop?filter=trending" className="hover:text-[#FF6A00] transition flex items-center gap-1">
                   <span>{t.trending}</span>
-                  <span className="text-[9px] bg-[#FF6A00] text-white px-1 rounded font-bold">HOT</span>
+                  <span className="text-[9px] bg-brand-orange-deep text-white px-1 rounded font-bold">HOT</span>
                 </Link>
               </li>
               <li>

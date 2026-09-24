@@ -70,10 +70,14 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="bn" suppressHydrationWarning>
       <head>
-        {/* Meta Pixel Code — `lazyOnload` keeps fbevents.js off the critical
-            path so it cannot contend with the LCP image on slow connections.
-            Trade-off: a bounce that happens before `window.load` may not be
-            reported. Switch back to `afterInteractive` if attribution drops. */}
+        {/* Meta Pixel Code — `lazyOnload` stops fbevents.js (111 KB) competing
+            with the critical path for bandwidth; measured locally: FCP 1.18s vs
+            1.60s, LCP 4.75s vs 6.35s, SI 2.27s vs 3.02s versus `afterInteractive`.
+            The CPU cost is identical either way (~440ms of long tasks), so the
+            strategy does not change TBT.
+            Trade-off: PageView fires after `window.load` instead of ~1s earlier,
+            so a bounce in that window may not be attributed. Switch back to
+            `afterInteractive` if that shows up in Events Manager. */}
         <Script id="facebook-pixel" strategy="lazyOnload">
           {`!function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?

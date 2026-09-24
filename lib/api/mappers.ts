@@ -6,12 +6,16 @@ import type {
   Order,
   OrderItem,
   Product,
+  ProductSummary,
   PromoSection,
   Review,
   AdminUser,
   ManagedUser,
 } from '@/types';
 import type { CustomerUser } from '@/context/AuthContext';
+// Type-only, so it is erased at build time and introduces no import cycle with
+// endpoints.ts (which value-imports these mappers).
+import type { ProductPage, ProductSummaryPage } from './endpoints';
 import type {
   ApiAdmin,
   ApiBanner,
@@ -29,9 +33,34 @@ import type {
 } from './types';
 
 /**
- * Translates the API's camelCase payloads into the snake_case shapes the
- * existing components already render, so only the data layer had to change.
+ * Narrows a full product to the fields a listing card renders. Used on the
+ * server before handing data to a client component, so the descriptions and
+ * specs never cross the wire.
  */
+export function toProductSummary(p: Product): ProductSummary {
+  return {
+    id: p.id,
+    name_en: p.name_en,
+    name_bn: p.name_bn,
+    slug: p.slug,
+    brand: p.brand,
+    price: p.price,
+    compare_price: p.compare_price,
+    thumbnail_url: p.thumbnail_url,
+    stock_quantity: p.stock_quantity,
+    low_stock_threshold: p.low_stock_threshold,
+    rating: p.rating,
+    reviews_count: p.reviews_count,
+    is_trending: p.is_trending,
+  };
+}
+
+export function toProductSummaryPage(page: ProductPage): ProductSummaryPage {
+  return { ...page, products: page.products.map(toProductSummary) };
+}
+
+/** Translates the API's camelCase payloads into the snake_case shapes the
+ * existing components already render, so only the data layer had to change. */
 
 // ------------------------------------------------------------ to frontend
 

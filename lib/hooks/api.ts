@@ -24,6 +24,11 @@ const ADMIN = 'admin';
 
 // ------------------------------------------------------------------ catalog
 
+/**
+ * Listing reads return `ProductSummaryPage`: the API sends full records, but
+ * the UI only ever renders card fields, and server-rendered pages seed this key
+ * with summaries only. The detail hooks below still return full products.
+ */
 export function useProducts(
   query: ProductQuery = {},
   options: { enabled?: boolean } = {},
@@ -31,7 +36,7 @@ export function useProducts(
   const enabled = options.enabled ?? true;
   const key = enabled ? (['products', query] as const) : null;
   const { data, error, isLoading, mutate: refresh } = useSWR<
-    api.ProductPage,
+    api.ProductSummaryPage,
     SwrError
   >(key, () => api.listProducts(query));
 

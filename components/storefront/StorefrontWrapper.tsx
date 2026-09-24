@@ -1,24 +1,16 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
 import { SWRConfig } from 'swr';
 import { AppProvider } from '@/context/AppContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { trackPageView } from '@/lib/analytics/facebook-pixel';
 import Navbar from '@/components/storefront/Navbar';
+import CartDrawer from '@/components/storefront/CartDrawer';
 import MobileBottomNav from '@/components/storefront/MobileBottomNav';
+import WhatsAppButton from '@/components/storefront/WhatsAppButton';
 import Footer from '@/components/storefront/Footer';
-
-// Interaction-only chrome: neither renders anything until it is opened or
-// clicked, so there is no reason to ship their code with the first paint.
-const CartDrawer = dynamic(() => import('@/components/storefront/CartDrawer'), {
-  ssr: false,
-});
-const WhatsAppButton = dynamic(() => import('@/components/storefront/WhatsAppButton'), {
-  ssr: false,
-});
 
 export default function StorefrontWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

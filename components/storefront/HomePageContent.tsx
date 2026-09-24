@@ -27,6 +27,14 @@ const HeroBanner = dynamic(() => import('@/components/storefront/HeroBanner'), {
 });
 
 /**
+ * This grid is edge-to-edge inside `main` (px-4 on phones, plus the card's own
+ * 1px border), so 100vw overstates it. See ProductCard's default for the
+ * rationale.
+ */
+const TRENDING_CARD_IMAGE_SIZES =
+  '(max-width: 640px) calc(100vw - 34px), (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw';
+
+/**
  * Receives the homepage catalogue from the server and publishes it as SWR
  * fallback data, so the first client render is the final content instead of
  * skeletons.
@@ -193,7 +201,11 @@ function HomeSections() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
             {displayedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                sizes={TRENDING_CARD_IMAGE_SIZES}
+              />
             ))}
           </div>
         )}

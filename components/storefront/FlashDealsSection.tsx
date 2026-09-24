@@ -14,6 +14,15 @@ import { toBanglaNumber } from '@/lib/bangladesh-data';
 const FLASH_GRID_COLUMNS = 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
 
 /**
+ * The card's true width on a phone: viewport minus `main`'s px-4 (32) and this
+ * section's p-5 (40) plus its 1px border (2) — 336px at a 412px viewport, not
+ * the 100vw the shared default assumes. Declaring it means the browser picks the
+ * 828px candidate for the LCP image instead of 1200px.
+ */
+const FLASH_CARD_IMAGE_SIZES =
+  '(max-width: 640px) calc(100vw - 76px), (max-width: 1024px) 50vw, 25vw';
+
+/**
  * Split out of the section on purpose: its one-second tick re-renders only these
  * digits, instead of the whole product grid (which would be a 1 Hz main-thread
  * task for as long as the page is open).
@@ -106,7 +115,12 @@ export default function FlashDealsSection() {
       ) : (
         <div className={`grid ${FLASH_GRID_COLUMNS} gap-3 sm:gap-5`}>
           {flashProducts.map((product, index) => (
-            <ProductCard key={product.id} product={product} priority={index === 0} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              priority={index === 0}
+              sizes={FLASH_CARD_IMAGE_SIZES}
+            />
           ))}
         </div>
       )}

@@ -55,11 +55,15 @@ export default function Logo({ variant = 'full', className = '' }: LogoProps) {
       <div className="flex flex-col">
         <div className="flex items-center gap-1.5 leading-none">
           <span className={`text-2xl font-black tracking-tight ${isFooter ? 'text-white' : 'text-[#07111F]'}`}>
-            Khuji<span className={isFooter ? 'text-brand-orange' : 'text-brand-orange-deep'}>Go</span>
+            Khuji
+            {/* On the navy footer the deep shade would be unreadable, and the
+                brand orange only reaches 4.3:1 against the tinted chip below;
+                the bright shade clears AA at 5.2:1. */}
+            <span className={isFooter ? 'text-brand-orange-bright' : 'text-brand-orange-deep'}>Go</span>
           </span>
           <span
             className={`px-1.5 py-0.5 text-[10px] font-extrabold uppercase rounded bg-[#FFC400]/20 border border-[#FFC400]/40 ${
-              isFooter ? 'text-brand-orange' : 'text-brand-orange-deep'
+              isFooter ? 'text-brand-orange-bright' : 'text-brand-orange-deep'
             }`}
           >
             BD

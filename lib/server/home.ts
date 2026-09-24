@@ -5,6 +5,7 @@ import {
   listProducts,
   listReviews,
 } from '@/lib/api/endpoints';
+import { toProductSummaryPage } from '@/lib/api/mappers';
 import {
   HOME_FLASH_QUERY,
   HOME_REVIEWS_LIMIT,
@@ -26,11 +27,16 @@ async function load<T>(label: string, request: () => Promise<T>): Promise<T | nu
   }
 }
 
-/** Everything the homepage needs before its first paint, fetched in parallel. */
+/**
+ * Everything the homepage needs before its first paint, fetched in parallel.
+ * Listings are narrowed to card fields here so the product descriptions and
+ * specs stay on the server (~22 KB less data in the HTML and in the props the
+ * client has to hydrate).
+ */
 export async function getHomeData(): Promise<HomeData> {
   const [trending, flashDeals, categories, banners, promo, reviews] = await Promise.all([
-    load('trending products', () => listProducts(HOME_TRENDING_QUERY)),
-    load('flash deals', () => listProducts(HOME_FLASH_QUERY)),
+    load('trending products', async () => toProductSummaryPage(await listProducts(HOME_TRENDING_QUERY))),
+    load('flash deals', async () => toProductSummaryPage(await listProducts(HOME_FLASH_QUERY))),
     load('categories', () => listCategories()),
     load('banners', () => listBanners()),
     load('promo section', () => getPromoSection()),

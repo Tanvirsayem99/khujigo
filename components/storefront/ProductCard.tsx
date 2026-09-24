@@ -5,16 +5,27 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Heart, ShoppingBag, Zap, Star, Flame } from 'lucide-react';
-import { Product } from '@/types';
+import { ProductSummary } from '@/types';
 import { useApp } from '@/context/AppContext';
 import { formatPriceBD, toBanglaNumber } from '@/lib/bangladesh-data';
 
+/** Conservative default: correct for a single-column grid on phones, and never
+ *  under-declares on the wider breakpoints. Grids that know their real width
+ *  should pass `sizes` (see the homepage grids). */
+export const DEFAULT_CARD_IMAGE_SIZES =
+  '(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw';
+
 interface ProductCardProps {
-  product: Product;
+  product: ProductSummary;
   priority?: boolean;
+  sizes?: string;
 }
 
-function ProductCard({ product, priority = false }: ProductCardProps) {
+function ProductCard({
+  product,
+  priority = false,
+  sizes = DEFAULT_CARD_IMAGE_SIZES,
+}: ProductCardProps) {
   const router = useRouter();
   const { language, t, addToCart, isInWishlist, toggleWishlist, showToast } = useApp();
 
@@ -58,9 +69,13 @@ function ProductCard({ product, priority = false }: ProductCardProps) {
           src={product.thumbnail_url}
           alt={language === 'bn' ? product.name_bn : product.name_en}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          sizes={sizes}
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           priority={priority}
+          // Next 15.5 only emits `fetchpriority` from this prop — `priority`
+          // alone adds the preload link but leaves the <img> without a priority
+          // hint, which is what "LCP request discovery" flags.
+          fetchPriority={priority ? 'high' : undefined}
           referrerPolicy="no-referrer"
         />
 

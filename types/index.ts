@@ -20,33 +20,44 @@ export interface ProductImage {
   alt?: string;
 }
 
-export interface Product {
+/**
+ * The slice of a product that a listing card, the cart, the wishlist and the
+ * pixel events actually read. Listing endpoints feed this to the UI, so a
+ * server-rendered grid sends only these fields instead of the full record
+ * (descriptions, specifications and gallery make up ~83% of a product payload).
+ * A full `Product` satisfies this type, so detail pages can pass it anywhere a
+ * summary is expected.
+ */
+export interface ProductSummary {
   id: string;
   name_en: string;
   name_bn: string;
   slug: string;
+  brand: string;
+  price: number;
+  compare_price?: number;
+  thumbnail_url: string;
+  stock_quantity: number;
+  low_stock_threshold: number;
+  rating: number;
+  reviews_count: number;
+  is_trending: boolean;
+}
+
+export interface Product extends ProductSummary {
   sku: string;
   category_id: string;
   category_name?: string;
-  brand: string;
   short_desc_en: string;
   short_desc_bn: string;
   description_en: string;
   description_bn: string;
-  price: number;
-  compare_price?: number;
   discount_percent?: number;
-  stock_quantity: number;
-  low_stock_threshold: number;
-  thumbnail_url: string;
   gallery_urls: string[];
   status: 'ACTIVE' | 'DRAFT' | 'OUT_OF_STOCK' | 'ARCHIVED';
   is_featured: boolean;
-  is_trending: boolean;
   is_best_seller: boolean;
   is_new_arrival: boolean;
-  rating: number;
-  reviews_count: number;
   specifications: { key_en: string; key_bn: string; value_en: string; value_bn: string }[];
   tags: string[];
   seo_title?: string;
@@ -71,7 +82,7 @@ export interface CartItem {
 
 export interface WishlistItem {
   id: string;
-  product: Product;
+  product: ProductSummary;
   added_at: string;
 }
 

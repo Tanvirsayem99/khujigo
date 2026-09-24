@@ -10,6 +10,7 @@ import type {
   PaymentMethod,
   PaymentStatus,
   Product,
+  ProductSummary,
   PromoSection,
   Review,
   ReviewStatus,
@@ -72,12 +73,18 @@ export interface ProductQuery {
   limit?: number;
 }
 
-export interface ProductPage {
-  products: Product[];
+/** What a listing request can hand to the UI: card-level fields only. */
+export interface ProductSummaryPage {
+  products: ProductSummary[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
+}
+
+/** The un-narrowed shape the API returns; accepted anywhere a summary page is. */
+export interface ProductPage extends ProductSummaryPage {
+  products: Product[];
 }
 
 export async function listProducts(query: ProductQuery = {}): Promise<ProductPage> {

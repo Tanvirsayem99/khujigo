@@ -1,5 +1,5 @@
 import type { Banner, Category, PromoSection, Review } from '@/types';
-import type { ProductPage, ProductQuery } from '@/lib/api/endpoints';
+import type { ProductQuery, ProductSummaryPage } from '@/lib/api/endpoints';
 import { unstable_serialize } from 'swr';
 
 /**
@@ -14,8 +14,8 @@ export const HOME_REVIEWS_LIMIT = 4;
 
 /** `null` means the server read failed and the client hook should fetch it. */
 export interface HomeData {
-  trending: ProductPage | null;
-  flashDeals: ProductPage | null;
+  trending: ProductSummaryPage | null;
+  flashDeals: ProductSummaryPage | null;
   categories: Category[] | null;
   banners: Banner[] | null;
   promo: PromoSection | null;

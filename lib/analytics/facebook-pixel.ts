@@ -1,4 +1,4 @@
-import type { CartItem, Order, Product } from '@/types';
+import type { CartItem, Order, ProductSummary } from '@/types';
 
 /** Every price in the catalog is a whole-taka BDT amount — no subunit conversion. */
 export const PIXEL_CURRENCY = 'BDT';
@@ -48,7 +48,7 @@ export function trackPageView() {
   track('PageView');
 }
 
-export function trackViewContent(product: Product) {
+export function trackViewContent(product: ProductSummary) {
   track('ViewContent', {
     content_ids: [product.id],
     content_name: product.name_en,
@@ -58,7 +58,7 @@ export function trackViewContent(product: Product) {
   });
 }
 
-export function trackAddToCart(product: Product, quantity: number) {
+export function trackAddToCart(product: ProductSummary, quantity: number) {
   track('AddToCart', {
     content_ids: [product.id],
     content_name: product.name_en,
@@ -69,7 +69,7 @@ export function trackAddToCart(product: Product, quantity: number) {
   });
 }
 
-export function trackAddToWishlist(product: Product) {
+export function trackAddToWishlist(product: ProductSummary) {
   track('AddToWishlist', {
     content_ids: [product.id],
     content_name: product.name_en,

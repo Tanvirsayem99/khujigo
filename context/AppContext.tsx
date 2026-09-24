@@ -8,7 +8,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { CartItem, Product, WishlistItem, Language } from '@/types';
+import { CartItem, ProductSummary, WishlistItem, Language } from '@/types';
 import { translations } from '@/lib/i18n';
 import { trackAddToCart, trackAddToWishlist } from '@/lib/analytics/facebook-pixel';
 
@@ -21,7 +21,7 @@ interface AppContextType {
   t: TranslationHelper;
   tr: (options: { en: string; bn: string }) => string;
   cart: CartItem[];
-  addToCart: (product: Product, quantity?: number) => void;
+  addToCart: (product: ProductSummary, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateCartQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -30,7 +30,7 @@ interface AppContextType {
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
   wishlist: WishlistItem[];
-  toggleWishlist: (product: Product) => void;
+  toggleWishlist: (product: ProductSummary) => void;
   isInWishlist: (productId: string) => boolean;
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
 }
@@ -101,7 +101,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Cart operations
   const addToCart = useCallback(
-    (product: Product, quantity: number = 1) => {
+    (product: ProductSummary, quantity: number = 1) => {
       setCart((prevCart) => {
         const existing = prevCart.find((item) => item.product_id === product.id);
         let newCart: CartItem[];
@@ -191,7 +191,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // Wishlist operations
   const toggleWishlist = useCallback(
-    (product: Product) => {
+    (product: ProductSummary) => {
       const isAdding = !wishlist.some((item) => item.product.id === product.id);
       setWishlist((prev) => {
         const exists = prev.some((item) => item.product.id === product.id);
