@@ -1,4 +1,5 @@
-import type {Metadata, Viewport} from 'next';
+import type { Metadata, Viewport } from 'next';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import Script from 'next/script';
 import './globals.css'; // Global styles
 import StorefrontWrapper from '@/components/storefront/StorefrontWrapper';
@@ -66,7 +67,7 @@ export const metadata: Metadata = {
     : {}),
 };
 
-export default function RootLayout({children}: {children: React.ReactNode}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn" suppressHydrationWarning>
       <head>
@@ -98,7 +99,7 @@ fbq('track', 'PageView');`}
           <img
             height="1"
             width="1"
-            style={{display: 'none'}}
+            style={{ display: 'none' }}
             alt=""
             src="https://www.facebook.com/tr?id=1471809464847775&ev=PageView&noscript=1"
           />
@@ -114,6 +115,7 @@ fbq('track', 'PageView');`}
         />
         <StorefrontWrapper>{children}</StorefrontWrapper>
       </body>
+      <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
     </html>
   );
 }

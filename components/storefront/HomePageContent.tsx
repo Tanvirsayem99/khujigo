@@ -83,8 +83,8 @@ function HomeSections() {
     activeTab === 'trending'
       ? trending
       : activeTab === 'best_seller'
-      ? bestSellers
-      : newArrivals;
+        ? bestSellers
+        : newArrivals;
 
   // Fall back to the trending set so a tab is never mysteriously empty.
   const displayedProducts =
@@ -106,25 +106,25 @@ function HomeSections() {
   const promoTitle = promoCoupon
     ? language === 'bn'
       ? promoSection?.title_bn ||
-        (promoCoupon.discount_type === 'FIXED'
-          ? `অর্ডারে ফ্ল্যাট ৳${promoCoupon.discount_value} ছাড়!`
-          : `অর্ডারে ${promoCoupon.discount_value}% ছাড়!`)
+      (promoCoupon.discount_type === 'FIXED'
+        ? `অর্ডারে ফ্ল্যাট ৳${promoCoupon.discount_value} ছাড়!`
+        : `অর্ডারে ${promoCoupon.discount_value}% ছাড়!`)
       : promoSection?.title_en ||
-        (promoCoupon.discount_type === 'FIXED'
-          ? `Get Flat ৳${promoCoupon.discount_value} Off on Your Order!`
-          : `Get ${promoCoupon.discount_value}% Off on Your Order!`)
+      (promoCoupon.discount_type === 'FIXED'
+        ? `Get Flat ৳${promoCoupon.discount_value} Off on Your Order!`
+        : `Get ${promoCoupon.discount_value}% Off on Your Order!`)
     : '';
 
   const promoDescription = promoCoupon
     ? language === 'bn'
       ? promoSection?.description_bn ||
-        (promoCoupon.min_order_amount > 0
-          ? `যেকোনো ৳${promoCoupon.min_order_amount} বা তার বেশি অর্ডারে কুপনটি ব্যবহার করুন। চেকআউট পেজে কোডটি লিখুন।`
-          : 'চেকআউটে কুপনটি ব্যবহার করে সাথে সাথে সাশ্রয় করুন।')
+      (promoCoupon.min_order_amount > 0
+        ? `যেকোনো ৳${promoCoupon.min_order_amount} বা তার বেশি অর্ডারে কুপনটি ব্যবহার করুন। চেকআউট পেজে কোডটি লিখুন।`
+        : 'চেকআউটে কুপনটি ব্যবহার করে সাথে সাথে সাশ্রয় করুন।')
       : promoSection?.description_en ||
-        (promoCoupon.min_order_amount > 0
-          ? `Use this coupon on any order over ৳${promoCoupon.min_order_amount}. Enter code at checkout for instant savings.`
-          : `Use this coupon at checkout for instant savings.`)
+      (promoCoupon.min_order_amount > 0
+        ? `Use this coupon on any order over ৳${promoCoupon.min_order_amount}. Enter code at checkout for instant savings.`
+        : `Use this coupon at checkout for instant savings.`)
     : '';
 
   return (
@@ -159,33 +159,30 @@ function HomeSections() {
           <div className="flex flex-wrap items-center gap-1.5 p-1 bg-white rounded-2xl border border-gray-200 self-start sm:self-auto shadow-xs">
             <button
               onClick={() => setActiveTab('trending')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'trending'
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${activeTab === 'trending'
                   ? 'bg-brand-orange-deep text-white shadow-sm'
                   : 'text-gray-600 hover:text-brand-navy'
-              }`}
+                }`}
             >
               <Flame className="w-3.5 h-3.5" />
               <span>{language === 'bn' ? 'ট্রেন্ডিং' : 'Trending'}</span>
             </button>
             <button
               onClick={() => setActiveTab('best_seller')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'best_seller'
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${activeTab === 'best_seller'
                   ? 'bg-brand-orange-deep text-white shadow-sm'
                   : 'text-gray-600 hover:text-brand-navy'
-              }`}
+                }`}
             >
               <Award className="w-3.5 h-3.5" />
               <span>{language === 'bn' ? 'টপ সেলার' : 'Best Sellers'}</span>
             </button>
             <button
               onClick={() => setActiveTab('new_arrival')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${
-                activeTab === 'new_arrival'
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${activeTab === 'new_arrival'
                   ? 'bg-brand-orange-deep text-white shadow-sm'
                   : 'text-gray-600 hover:text-brand-navy'
-              }`}
+                }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>{language === 'bn' ? 'নতুন আগমন' : 'New Arrivals'}</span>
